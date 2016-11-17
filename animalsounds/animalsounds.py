@@ -10,7 +10,7 @@ class Animalsounds:
     def __init__(self, bot):
         self.bot = bot
         self.audio_player = False
-        self.sound_base = 'data/animalsounds/sounds'
+        self.sound_base = 'data/animalsounds/data/sounds'
 
     def voice_connected(self, server):
         if self.bot.is_voice_connected(server):
