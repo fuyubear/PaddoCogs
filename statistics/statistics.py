@@ -78,7 +78,10 @@ class Statistics:
 
     async def retrieve_statistics(self):
         name = self.bot.user.name
-        uptime = abs(self.bot.uptime - int(time.perf_counter()))
+        try:
+            uptime = abs(self.bot.uptime - int(time.perf_counter()))
+        except TypeError:
+            uptime = abs(int(time.mktime(self.bot.uptime.timetuple())) - int(time.perf_counter()))
         up = datetime.timedelta(seconds=uptime)
         days = up.days
         hours = int(up.seconds/3600)
