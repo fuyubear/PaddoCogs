@@ -1,6 +1,7 @@
+import os
+import discord
 from discord.ext import commands
 from cogs.utils.dataIO import dataIO
-import os
 
 
 class Away:
@@ -17,11 +18,14 @@ class Away:
             data = dataIO.load_json(self.away_data)
             for mention in tmp:
                 if mention.mention in data:
+                    avatar = mention.avatar_url if mention.avatar else mention.default_avatar_url
                     if data[mention.mention]['MESSAGE']:
-                        msg = '{} is currently away.'.format(mention.name)
+                        em = discord.Embed(color=discord.Color.blue())
+                        em.set_author(name='{} is currently away'.format(mention.display_name), icon_url=avatar)
                     else:
-                        msg = '{} is currently away and has set a personal message: {}'.format(mention.name, data[mention.mention]['MESSAGE'])
-                    await self.bot.send_message(message.channel, msg)
+                        em = discord.Embed(description=data[mention.mention]['MESSAGE'], color=discord.Color.blue())
+                        em.set_author(name='{} is currently away'.format(mention.display_name), icon_url=avatar)
+                    await self.bot.send_message(message.channel, embed=em)
 
     @commands.command(pass_context=True, name="away")
     async def _away(self, context, *message: str):
