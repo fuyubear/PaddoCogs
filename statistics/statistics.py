@@ -81,7 +81,7 @@ class Statistics:
         try:
             uptime = abs(self.bot.uptime - int(time.perf_counter()))
         except TypeError:
-            uptime = abs(int(time.mktime(self.bot.uptime.timetuple())) - int(time.perf_counter()))
+            uptime = time.time() - time.mktime(self.bot.uptime.timetuple())
         up = datetime.timedelta(seconds=uptime)
         days = up.days
         hours = int(up.seconds/3600)
