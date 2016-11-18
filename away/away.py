@@ -16,24 +16,25 @@ class Away:
             tmp[mention] = True
         if message.author.id != self.bot.user.id:
             data = dataIO.load_json(self.away_data)
-            for mention in tmp:
-                if mention.mention in data:
-                    avatar = mention.avatar_url if mention.avatar else mention.default_avatar_url
-                    if data[mention.mention]['MESSAGE']:
-                        em = discord.Embed(color=discord.Color.blue())
-                        em.set_author(name='{} is currently away'.format(mention.display_name), icon_url=avatar)
+            for author in tmp:
+                if author.id in data:
+                    avatar = author.avatar_url if author.avatar else author.default_avatar_url
+                    if data[author.id]['MESSAGE']:
+                        em = discord.Embed(description=data[author.id]['MESSAGE'], color=discord.Color.blue())
+                        em.set_author(name='{} is currently away'.format(author.display_name), icon_url=avatar)
+
                     else:
-                        em = discord.Embed(description=data[mention.mention]['MESSAGE'], color=discord.Color.blue())
-                        em.set_author(name='{} is currently away'.format(mention.display_name), icon_url=avatar)
+                        em = discord.Embed(color=discord.Color.blue())
+                        em.set_author(name='{} is currently away'.format(author.display_name), icon_url=avatar)
                     await self.bot.send_message(message.channel, embed=em)
 
     @commands.command(pass_context=True, name="away")
     async def _away(self, context, *message: str):
         """Tell the bot you're away or back."""
         data = dataIO.load_json(self.away_data)
-        author_mention = context.message.author.mention
-        if author_mention in data:
-            del data[author_mention]
+        author = context.message.author
+        if author.id in data:
+            del data[author.id]
             msg = 'You\'re now back.'
         else:
             data[context.message.author.mention] = {}
