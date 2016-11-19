@@ -80,21 +80,19 @@ class Weather:
 
     @commands.command(pass_context=True, name='weatherkey')
     @checks.is_owner()
-    async def _weatherkey(self, context, arguments: str):
+    async def _weatherkey(self, context, key: str):
         """Acquire a key from  http://openweathermap.org/"""
         settings = dataIO.load_json(self.settings_file)
-        if arguments:
-            settings['WEATHER_API_KEY'] = arguments[0]
-            dataIO.save_json(self.settings_file, settings)
+        settings['WEATHER_API_KEY'] = key
+        dataIO.save_json(self.settings_file, settings)
 
     @commands.command(pass_context=True, name='timekey')
     @checks.is_owner()
-    async def _timekey(self, context, *arguments: str):
+    async def _timekey(self, context, key: str):
         """Acquire a key from https://timezonedb.com/api"""
         settings = dataIO.load_json(self.settings_file)
-        if arguments:
-            settings['TIME_API_KEY'] = arguments[0]
-            dataIO.save_json(self.settings_file, settings)
+        settings['TIME_API_KEY'] = key
+        dataIO.save_json(self.settings_file, settings)
 
 
 def check_folder():
