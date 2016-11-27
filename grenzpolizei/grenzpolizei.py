@@ -26,7 +26,7 @@ class Grenzpolizei:
         data = fileIO(self.settings_file, 'load')
         if server.id not in data:
             data[server.id] = {}
-        data[server.id]['CUSTOMS_CHANNEL'] = channel.channel_mentions[0].id
+        data[server.id]['CUSTOMS_CHANNEL'] = channel.id
         fileIO(self.settings_file, 'save', data)
         message = 'Done!'
         await self.bot.say(message)
