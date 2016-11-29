@@ -33,28 +33,6 @@ class Grenzpolizei:
         if server.id not in data:
             data[server.id] = {}
         data[server.id]['CUSTOMS_CHANNEL'] = channel.id
-        data[server.id]['IGNORE_BOTS'] = False
-        fileIO(self.settings_file, 'save', data)
-        message = 'Done!'
-        await self.bot.say(message)
-
-    @_grenzpolizei.command(pass_context=True, name='ignorebots')
-    async def _ignore_bots(self, context):
-        """
-        Ignore bots on this server
-        """
-        server = context.message.server
-        data = fileIO(self.settings_file, 'load')
-        if server.id not in data:
-            data[server.id] = {}
-
-        if 'IGNORE_BOTS' not in data[server.id]:
-            data[server.id]['IGNORE_BOTS'] = False
-        if data[server.id]['IGNORE_BOTS']:
-            data[server.id]['IGNORE_BOTS'] = False
-        else:
-            data[server.id]['IGNORE_BOTS'] = True
-
         fileIO(self.settings_file, 'save', data)
         message = 'Done!'
         await self.bot.say(message)
@@ -218,26 +196,23 @@ class Grenzpolizei:
     async def _on_message_delete(self, message):
         server = message.server
         member = message.author
-        data = fileIO(self.settings_file, 'load')
-        if server.id in data:
-            if data[server.id]['CUSTOMS_CHANNEL']:
-                ok = True
-                if data[server.id]['IGNORE_BOTS'] and member.bot:
-                    ok = False
-                if ok:
-                    channel = data[server.id]['CUSTOMS_CHANNEL']
-                    customs_channel = discord.utils.get(self.bot.get_all_channels(), id=channel)
-                    removed_message = message.clean_content
-                    removed_message_channel = message.channel.mention
-                    removed_message_timestamp = str(message.timestamp)
-                    avatar = member.avatar_url if member.avatar else member.default_avatar_url
-                    em = discord.Embed(color=discord.Color.red())
-                    em.set_author(name='A message by {}#{} has been removed'.format(member.display_name, member.discriminator), icon_url=avatar)
-                    em.add_field(name='**Channel**', value=removed_message_channel)
-                    em.add_field(name='**Message timestamp**', value=str(removed_message_timestamp).split('.')[0])
-                    em.add_field(name='**Removal timestamp**', value=str(time.strftime('%Y-%m-%d %H:%M:%S')))
-                    em.add_field(name='**Message**', value=removed_message, inline=False)
-                    await self.bot.send_message(customs_channel, embed=em)
+        if self.bot.user.id is not member.id:
+            data = fileIO(self.settings_file, 'load')
+            if server.id in data:
+                if data[server.id]['CUSTOMS_CHANNEL']:
+                        channel = data[server.id]['CUSTOMS_CHANNEL']
+                        customs_channel = discord.utils.get(self.bot.get_all_channels(), id=channel)
+                        removed_message = message.clean_content
+                        removed_message_channel = message.channel.mention
+                        removed_message_timestamp = str(message.timestamp)
+                        avatar = member.avatar_url if member.avatar else member.default_avatar_url
+                        em = discord.Embed(color=discord.Color.red())
+                        em.set_author(name='A message by {}#{} has been removed'.format(member.display_name, member.discriminator), icon_url=avatar)
+                        em.add_field(name='**Channel**', value=removed_message_channel)
+                        em.add_field(name='**Message timestamp**', value=str(removed_message_timestamp).split('.')[0])
+                        em.add_field(name='**Removal timestamp**', value=str(time.strftime('%Y-%m-%d %H:%M:%S')))
+                        em.add_field(name='**Message**', value=removed_message, inline=False)
+                        await self.bot.send_message(customs_channel, embed=em)
 
     async def _on_member_remove(self, member):
         server = member.server
