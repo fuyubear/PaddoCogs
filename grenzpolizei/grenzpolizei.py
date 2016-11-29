@@ -172,6 +172,7 @@ class Grenzpolizei:
         data = fileIO(self.settings_file, 'load')
         passports = fileIO(self.passports_file, 'load')
         timestamp = str(time.time())
+
         if server.id in data:
             if data[server.id]['CUSTOMS_CHANNEL']:
                 channel = data[server.id]['CUSTOMS_CHANNEL']
