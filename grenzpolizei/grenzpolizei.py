@@ -1,3 +1,4 @@
+from __main__ import send_cmd_help
 from discord.ext import commands
 from .utils.dataIO import fileIO
 from .utils import checks
@@ -9,16 +10,21 @@ import os
 
 class Grenzpolizei:
     """
-    Be a despotic dictator and keep tabs on every member on the server.
+    Be like the Stasi and keep tabs on every member on the server.
     """
     def __init__(self, bot):
         self.bot = bot
         self.settings_file = 'data/grenzpolizei/settings.json'
         self.passports_file = 'data/grenzpolizei/passports.json'
 
-    @commands.command(pass_context=True, name='bordersetup', aliases=[])
+    @commands.group(pass_context=True, name='border', aliases=[])
     @checks.mod_or_permissions(administrator=True)
-    async def _first_setup(self, context, channel: discord.Channel):
+    async def _grenzpolizei(self, context):
+        if context.invoked_subcommand is None:
+            await send_cmd_help(context)
+
+    @_grenzpolizei.command(pass_context=True, name='setup')
+    async def _setup(self, context, channel: discord.Channel):
         """
         Setup a channel
         """
@@ -27,12 +33,34 @@ class Grenzpolizei:
         if server.id not in data:
             data[server.id] = {}
         data[server.id]['CUSTOMS_CHANNEL'] = channel.id
+        data[server.id]['IGNORE_BOTS'] = False
         fileIO(self.settings_file, 'save', data)
         message = 'Done!'
         await self.bot.say(message)
 
-    @commands.command(pass_context=True, name='borderunset', aliases=[])
-    @checks.mod_or_permissions(administrator=True)
+    @_grenzpolizei.command(pass_context=True, name='ignorebots')
+    async def _ignore_bots(self, context):
+        """
+        Ignore bots on this server
+        """
+        server = context.message.server
+        data = fileIO(self.settings_file, 'load')
+        if server.id not in data:
+            data[server.id] = {}
+
+        if 'IGNORE_BOTS' not in data[server.id]:
+            data[server.id]['IGNORE_BOTS'] = False
+
+        if data[server.id]['IGNORE_BOTS']:
+            data[server.id]['IGNORE_BOTS'] = False
+        else:
+            data[server.id]['IGNORE_BOTS'] = True
+
+        fileIO(self.settings_file, 'save', data)
+        message = 'Done!'
+        await self.bot.say(message)
+
+    @_grenzpolizei.command(pass_context=True, name='unset', aliases=[])
     async def _clean_setup(self, context):
         """
         Remove channel from this server.
@@ -194,19 +222,20 @@ class Grenzpolizei:
         data = fileIO(self.settings_file, 'load')
         if server.id in data:
             if data[server.id]['CUSTOMS_CHANNEL']:
-                channel = data[server.id]['CUSTOMS_CHANNEL']
-                customs_channel = discord.utils.get(self.bot.get_all_channels(), id=channel)
-                removed_message = message.clean_content
-                removed_message_channel = message.channel.mention
-                removed_message_timestamp = str(message.timestamp)
-                avatar = member.avatar_url if member.avatar else member.default_avatar_url
-                em = discord.Embed(color=discord.Color.red())
-                em.set_author(name='A message by {}#{} has been removed'.format(member.display_name, member.discriminator), icon_url=avatar)
-                em.add_field(name='**Channel**', value=removed_message_channel)
-                em.add_field(name='**Message timestamp**', value=str(removed_message_timestamp).split('.')[0])
-                em.add_field(name='**Removal timestamp**', value=str(time.strftime('%Y-%m-%d %H:%M:%S')))
-                em.add_field(name='**Message**', value=removed_message, inline=False)
-                await self.bot.send_message(customs_channel, embed=em)
+                if not data[server.id]['IGNORE_BOTS']:
+                    channel = data[server.id]['CUSTOMS_CHANNEL']
+                    customs_channel = discord.utils.get(self.bot.get_all_channels(), id=channel)
+                    removed_message = message.clean_content
+                    removed_message_channel = message.channel.mention
+                    removed_message_timestamp = str(message.timestamp)
+                    avatar = member.avatar_url if member.avatar else member.default_avatar_url
+                    em = discord.Embed(color=discord.Color.red())
+                    em.set_author(name='A message by {}#{} has been removed'.format(member.display_name, member.discriminator), icon_url=avatar)
+                    em.add_field(name='**Channel**', value=removed_message_channel)
+                    em.add_field(name='**Message timestamp**', value=str(removed_message_timestamp).split('.')[0])
+                    em.add_field(name='**Removal timestamp**', value=str(time.strftime('%Y-%m-%d %H:%M:%S')))
+                    em.add_field(name='**Message**', value=removed_message, inline=False)
+                    await self.bot.send_message(customs_channel, embed=em)
 
     async def _on_member_remove(self, member):
         server = member.server
