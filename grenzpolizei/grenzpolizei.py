@@ -50,7 +50,6 @@ class Grenzpolizei:
 
         if 'IGNORE_BOTS' not in data[server.id]:
             data[server.id]['IGNORE_BOTS'] = False
-
         if data[server.id]['IGNORE_BOTS']:
             data[server.id]['IGNORE_BOTS'] = False
         else:
@@ -222,7 +221,10 @@ class Grenzpolizei:
         data = fileIO(self.settings_file, 'load')
         if server.id in data:
             if data[server.id]['CUSTOMS_CHANNEL']:
-                if not data[server.id]['IGNORE_BOTS']:
+                ok = True
+                if data[server.id]['IGNORE_BOTS'] and member.bot:
+                    ok = False
+                if ok:
                     channel = data[server.id]['CUSTOMS_CHANNEL']
                     customs_channel = discord.utils.get(self.bot.get_all_channels(), id=channel)
                     removed_message = message.clean_content
