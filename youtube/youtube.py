@@ -93,7 +93,7 @@ class YouTube:
             metadata = await self.get_song_metadata(url)
             em = discord.Embed(title=metadata['author_name'], color=discord.Color.red(), url=metadata['author_url'])
             em.set_author(name=metadata['title'], url=url)
-            em.set_image(url=metadata['thumbnail_url'], width=metadata['thumbnail_width'], height=metadata['height'])
+            em.set_image(url=metadata['thumbnail_url'])
             # em.video.url = url
             # em.video.width = 480
             # em.video.height = 270
