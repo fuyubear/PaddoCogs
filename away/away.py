@@ -3,24 +3,25 @@ import discord
 from discord.ext import commands
 from cogs.utils.dataIO import dataIO
 
+JSON = 'data/away/away.json'
+
 
 class Away:
     """Le away cog"""
     def __init__(self, bot):
         self.bot = bot
-        self.away_data = 'data/away/away.json'
+        self.data = dataIO.load_json(JSON)
 
     async def listener(self, message):
         tmp = {}
         for mention in message.mentions:
             tmp[mention] = True
         if message.author.id != self.bot.user.id:
-            data = dataIO.load_json(self.away_data)
             for author in tmp:
-                if author.id in data:
+                if author.id in self.data:
                     avatar = author.avatar_url if author.avatar else author.default_avatar_url
-                    if data[author.id]['MESSAGE']:
-                        em = discord.Embed(description=data[author.id]['MESSAGE'], color=discord.Color.blue())
+                    if self.data[author.id]['MESSAGE']:
+                        em = discord.Embed(description=self.data[author.id]['MESSAGE'], color=discord.Color.blue())
                         em.set_author(name='{} is currently away'.format(author.display_name), icon_url=avatar)
                     else:
                         em = discord.Embed(color=discord.Color.blue())
@@ -30,19 +31,18 @@ class Away:
     @commands.command(pass_context=True, name="away")
     async def _away(self, context, *message: str):
         """Tell the bot you're away or back."""
-        data = dataIO.load_json(self.away_data)
         author = context.message.author
-        if author.id in data:
-            del data[author.id]
+        if author.id in self.data:
+            del self.data[author.id]
             msg = 'You\'re now back.'
         else:
-            data[context.message.author.id] = {}
+            self.data[context.message.author.id] = {}
             if len(str(message)) < 256:
-                data[context.message.author.id]['MESSAGE'] = ' '.join(context.message.clean_content.split()[1:])
+                self.data[context.message.author.id]['MESSAGE'] = ' '.join(context.message.clean_content.split()[1:])
             else:
-                data[context.message.author.id]['MESSAGE'] = True
+                self.data[context.message.author.id]['MESSAGE'] = True
             msg = 'You\'re now set as away.'
-        dataIO.save_json(self.away_data, data)
+        dataIO.save_json(JSON, self.data)
         await self.bot.say(msg)
 
 
@@ -53,10 +53,9 @@ def check_folder():
 
 
 def check_file():
-    away = {}
     f = 'data/away/away.json'
     if not dataIO.is_valid_json(f):
-        dataIO.save_json(f, away)
+        dataIO.save_json(f, {})
         print('Creating default away.json...')
 
 
