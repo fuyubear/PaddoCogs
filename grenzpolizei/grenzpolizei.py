@@ -196,7 +196,7 @@ class Grenzpolizei:
     async def _on_message_delete(self, message):
         server = message.server
         member = message.author
-        if self.bot.user.id is not member.id:
+        if self.bot.user.id != member.id:
             data = fileIO(self.settings_file, 'load')
             if server.id in data:
                 if data[server.id]['CUSTOMS_CHANNEL']:
