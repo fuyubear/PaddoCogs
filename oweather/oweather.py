@@ -85,6 +85,7 @@ class Weather:
         settings = dataIO.load_json(self.settings_file)
         settings['WEATHER_API_KEY'] = key
         dataIO.save_json(self.settings_file, settings)
+        await self.bot.say('Key saved!')
 
     @commands.command(pass_context=True, name='timekey')
     @checks.is_owner()
@@ -93,6 +94,7 @@ class Weather:
         settings = dataIO.load_json(self.settings_file)
         settings['TIME_API_KEY'] = key
         dataIO.save_json(self.settings_file, settings)
+        await self.bot.say('Key saved!')
 
 
 def check_folder():
