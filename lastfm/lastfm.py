@@ -1,4 +1,5 @@
 import os
+import discord
 import aiohttp
 import datetime
 from .utils import checks
@@ -18,7 +19,17 @@ class Lastfm:
         self.payload = {}
         self.payload['api_key'] = self.api_key
         self.payload['format'] = 'json'
-        self.payload['limit'] = '10'
+        self.payload['limit'] = '15'
+
+    async def _api_request(self, payload):
+        url = 'http://ws.audioscrobbler.com/2.0/?'
+        headers = {'user-agent': 'Red-cog/1.0'}
+        conn = aiohttp.TCPConnector(verify_ssl=False)
+        session = aiohttp.ClientSession(connector=conn)
+        async with session.get(url, params=payload, headers=headers) as r:
+            data = await r.json()
+        session.close()
+        return data
 
     @commands.group(pass_context=True, no_pm=True, name='lastfm', aliases=['lf'])
     async def _lastfm(self, context):
@@ -29,33 +40,26 @@ Will remember your username after setting one. [p]lastfm last @username will bec
             await send_cmd_help(context)
 
     @_lastfm.command(pass_context=True, no_pm=True, name='set')
-    async def _set(self, context, *username: str):
+    async def _set(self, context, username: str):
         """Set a username"""
-        if username:
-            try:
-                payload = self.payload
-                payload['method'] = 'user.getInfo'
-                payload['username'] = username[0]
-                url = 'http://ws.audioscrobbler.com/2.0/?'
-                headers = {'user-agent': 'Red-cog/1.0'}
-                conn = aiohttp.TCPConnector(verify_ssl=False)
-                session = aiohttp.ClientSession(connector=conn)
-                async with session.get(url, params=payload, headers=headers) as r:
-                    data = await r.json()
-                session.close()
-            except Exception as e:
-                message = 'Something went terribly wrong! [{}]'.format(e)
-            if 'error' in data:
-                message = '{}'.format(data['message'])
-            else:
-                settings = dataIO.load_json(self.settings_file)
-                settings['USERS'][context.message.author.id] = username[0]
-                username = username[0]
-                dataIO.save_json(self.settings_file, settings)
-                message = 'Username set'
+
+        try:
+            payload = self.payload
+            payload['method'] = 'user.getInfo'
+            payload['username'] = username[0]
+            data = await self._api_request(payload)
+        except Exception as e:
+            message = 'Something went terribly wrong! [{}]'.format(e)
+        if 'error' in data:
+            message = '{}'.format(data['message'])
         else:
-            message = 'Now come on, I need your username!'
-        await self.bot.say('```{}```'.format(message))
+            settings = dataIO.load_json(self.settings_file)
+            settings['USERS'][context.message.author.id] = username[0]
+            username = username[0]
+            dataIO.save_json(self.settings_file, settings)
+            message = 'Username set'
+
+        await self.bot.say(message)
 
     @_lastfm.command(pass_context=True, no_pm=True, name='info')
     async def _info(self, context, *username: str):
@@ -76,31 +80,39 @@ Will remember your username after setting one. [p]lastfm last @username will bec
                 payload = self.payload
                 payload['method'] = 'user.getInfo'
                 payload['username'] = username
-                url = 'http://ws.audioscrobbler.com/2.0/?'
-                headers = {'user-agent': 'Red-cog/1.0'}
-                conn = aiohttp.TCPConnector(verify_ssl=False)
-                session = aiohttp.ClientSession(connector=conn)
-                async with session.get(url, params=payload, headers=headers) as r:
-                    data = await r.json()
-                session.close()
+                data = await self._api_request(payload)
             except Exception as e:
                 message = 'Something went terribly wrong! [{}]'.format(e)
             if 'error' in data:
                 message = '{}'.format(data['message'])
+                await self.bot.say(message)
             else:
                 user = data['user']['name']
                 playcount = data['user']['playcount']
-                registered = data['user']['registered']['unixtime']
-                registered = datetime.datetime.fromtimestamp(int(registered)).strftime('%Y-%m-%d %H:%M:%S')
-                profile = data['user']['url']
-                message = 'Last.fm profile of {}\n\nScrobbles: {}\nRegistered: {}\nProfile: {}'.format(user, playcount, registered, profile)
+                registered = datetime.datetime.fromtimestamp(data['user']['registered']['#text']).strftime('%Y-%m-%d')
+                image = data['user']['image'][1]['#text']
+                print(data)
+                author = context.message.author
+                em = discord.Embed(url='http://www.last.fm/user/{}'.format(user), description='\a\n')
+                avatar = author.avatar_url if author.avatar else author.default_avatar_url
+                em.set_author(name='Last.fm profile of {} ({})'.format(user, author.name), icon_url=avatar)
+                if 'realname' in data['user']:
+                    realname = data['user']['realname']
+                    em.add_field(name='Name', value=realname)
+                if 'country' in data['user']:
+                    if data['user']['country']:
+                        em.add_field(name='Country', value=data['user']['country'])
+                em.add_field(name='Scrobbles', value=playcount)
+                em.add_field(name='Registered', value=registered)
+                em.set_thumbnail(url=image)
+                await self.bot.say(embed=em)
         else:
             message = 'No API key set for Last.fm. Get one at http://www.last.fm/api'
-        await self.bot.say('```{}```'.format(message))
+            await self.bot.say(message)
 
-    @_lastfm.command(pass_context=True, no_pm=True, name='last', aliases=['lp'])
-    async def _last(self, context, *username: str):
-        """Shows the last 10 played songs"""
+    @_lastfm.command(pass_context=True, no_pm=True, name='now')
+    async def _now(self, context, *username: str):
+        """Shows the current played song"""
         if self.api_key != '':
             if not username:
                 settings = dataIO.load_json(self.settings_file)
@@ -117,39 +129,81 @@ Will remember your username after setting one. [p]lastfm last @username will bec
                 payload = self.payload
                 payload['method'] = 'user.getRecentTracks'
                 payload['username'] = username
-                url = 'http://ws.audioscrobbler.com/2.0/?'
-                headers = {'user-agent': 'Red-cog/1.0'}
-                conn = aiohttp.TCPConnector(verify_ssl=False)
-                session = aiohttp.ClientSession(connector=conn)
-                async with session.get(url, params=payload, headers=headers) as r:
-                    data = await r.json()
-                session.close()
+                payload['limit'] = 1
+                data = await self._api_request(payload)
             except Exception as e:
                 message = 'Something went terribly wrong! [{}]'.format(e)
             if 'error' in data:
                 message = '{}'.format(data['message'])
+                await self.bot.say(message)
             else:
                 user = data['recenttracks']['@attr']['user']
-                message = '```Last 10 songs played by {}\n\n'.format(user)
-                for i, track in enumerate(data['recenttracks']['track'], 1):
-                    try:
-                        if track['@attr']['nowplaying'] == 'true':
-                            nowplaying = '(Now playing) '
-                    except KeyError:
-                        nowplaying = ''
-                    artist = track['artist']['#text']
-                    song = track['name']
-                    message += '{} {}{} - {}\n'.format(str(i).ljust(4), nowplaying, artist, song)
-                    if i > 9:
-                        break
-                message += '```'
+                track = data['recenttracks']['track'][0]
+                try:
+                    if track['@attr']['nowplaying'] == 'true':
+                        artist = track['artist']['#text']
+                        song = track['name']
+                        url = track['url']
+                        image = track['image'][-1]['#text']
+                        author = context.message.author
+                        em = discord.Embed(url=url)
+                        avatar = author.avatar_url if author.avatar else author.default_avatar_url
+                        em.set_author(name='{} - {}'.format(artist, song), icon_url=avatar)
+                        em.set_image(url=image)
+                        await self.bot.say(embed=em)
+
+                except KeyError:
+                    await self.bot.say('{} is not playing any song right now'.format(user))
         else:
             message = 'No API key set for Last.fm. Get one at http://www.last.fm/api'
-        await self.bot.say(message)
+            await self.bot.say(message)
+
+    @_lastfm.command(pass_context=True, no_pm=True, name='recent', aliases=['lp', 'last'])
+    async def _recent(self, context, *username: str):
+        """Shows recent tracks"""
+        if self.api_key != '':
+            if not username:
+                settings = dataIO.load_json(self.settings_file)
+                if context.message.author.id in settings['USERS']:
+                    username = settings['USERS'][context.message.author.id]
+            else:
+                user_patch = username[0].replace('!', '')
+                settings = dataIO.load_json(self.settings_file)
+                if user_patch[2:-1] in settings['USERS']:
+                    username = settings['USERS'][user_patch[2:-1]]
+                else:
+                    username = user_patch
+            try:
+                payload = self.payload
+                payload['method'] = 'user.getRecentTracks'
+                payload['username'] = username
+                data = await self._api_request(payload)
+            except Exception as e:
+                message = 'Something went terribly wrong! [{}]'.format(e)
+            if 'error' in data:
+                message = data['message']
+                await self.bot.say(message)
+            else:
+                user = data['recenttracks']['@attr']['user']
+                author = context.message.author
+                em = discord.Embed(description='\a\n\n', url='http://www.last.fm/user/{}/library'.format(user))
+                avatar = author.avatar_url if author.avatar else author.default_avatar_url
+                em.set_author(name='Recent Tracks by {}'.format(user), icon_url=avatar)
+                for i, track in enumerate(data['recenttracks']['track'], 1):
+                    if i > 15:
+                        break
+                    artist = track['artist']['#text']
+                    song = track['name']
+                    url = track['url']
+                    em.add_field(name='{}) {}'.format(str(i), song), value='[{}]({})'.format(artist, url))
+                await self.bot.say(embed=em)
+        else:
+            message = 'No API key set for Last.fm. Get one at http://www.last.fm/api'
+            await self.bot.say(message)
 
     @_lastfm.command(pass_context=True, no_pm=True, name='toptracks', aliases=['tracks', 'ttr'])
     async def _toptracks(self, context, *username: str):
-        """Top 10 most played songs"""
+        """Shows most played tracks"""
         if self.api_key != '':
             if not username:
                 settings = dataIO.load_json(self.settings_file)
@@ -166,32 +220,32 @@ Will remember your username after setting one. [p]lastfm last @username will bec
                 payload = self.payload
                 payload['method'] = 'user.getTopTracks'
                 payload['username'] = username
-                headers = {'user-agent': 'Red-cog/1.0'}
-                url = 'http://ws.audioscrobbler.com/2.0/?'
-                conn = aiohttp.TCPConnector(verify_ssl=False)
-                session = aiohttp.ClientSession(connector=conn)
-                async with session.get(url, params=payload, headers=headers) as r:
-                    data = await r.json()
-                session.close()
+                data = await self._api_request(payload)
             except Exception as e:
                 message = 'Something went terribly wrong! [{}]'.format(e)
             if 'error' in data:
-                message = '{}'.format(data['message'])
+                message = data['message']
+                await self.bot.say(message)
             else:
                 user = data['toptracks']['@attr']['user']
-                message = 'Top songs played by {0}\n\n'.format(user)
+                author = context.message.author
+                em = discord.Embed(description='\a\n\n', url='http://www.last.fm/user/{}/library/tracks'.format(user))
+                avatar = author.avatar_url if author.avatar else author.default_avatar_url
+                em.set_author(name='Top Tracks by {}'.format(user), icon_url=avatar)
                 for i, track in enumerate(data['toptracks']['track'], 1):
                     artist = track['artist']['name']
                     song = track['name']
-                    message += '{} {} - {}\n'.format(str(i).ljust(4), artist, song)
-
+                    url = track['url']
+                    plays = track['playcount']
+                    em.add_field(name='{}) {}'.format(str(i), song), value='[{} ({} plays)]({})'.format(artist, plays, url))
+                await self.bot.say(embed=em)
         else:
             message = 'No API key set for Last.fm. Get one at http://www.last.fm/api'
-        await self.bot.say('```{}```'.format(message))
+            await self.bot.say(message)
 
     @_lastfm.command(pass_context=True, no_pm=True, name='topartists', aliases=['artists', 'tar'])
     async def _topartists(self, context, *username: str):
-        """Top 10 played artists"""
+        """Shows most played artists"""
         if self.api_key != '':
             if not username:
                 settings = dataIO.load_json(self.settings_file)
@@ -208,32 +262,32 @@ Will remember your username after setting one. [p]lastfm last @username will bec
                 payload = self.payload
                 payload['method'] = 'user.getTopArtists'
                 payload['username'] = username
-                headers = {'user-agent': 'Red-cog/1.0'}
-                url = 'http://ws.audioscrobbler.com/2.0/?'
-                conn = aiohttp.TCPConnector(verify_ssl=False)
-                session = aiohttp.ClientSession(connector=conn)
-                async with session.get(url, params=payload, headers=headers) as r:
-                    data = await r.json()
-                session.close()
+                data = await self._api_request(payload)
             except Exception as e:
                 message = 'Something went terribly wrong! [{}]'.format(e)
 
             if 'error' in data:
-                message = '{}'.format(data['message'])
+                message = data['message']
+                await self.bot.say(message)
             else:
                 user = data['topartists']['@attr']['user']
-                message = 'Top artists played by {}\n\n'.format(user)
+                author = context.message.author
+                em = discord.Embed(description='\a\n\n', url='http://www.last.fm/user/{}/library/artists'.format(user))
+                avatar = author.avatar_url if author.avatar else author.default_avatar_url
+                em.set_author(name='Top Artists by {}'.format(user), icon_url=avatar)
                 for i, artist in enumerate(data['topartists']['artist'], 1):
                     artist_a = artist['name']
-                    message += '{} {}\n'.format(str(i).ljust(4), artist_a)
-
+                    url = artist['url']
+                    plays = artist['playcount']
+                    em.add_field(name='{}) {}'.format(str(i), artist_a), value='[{} plays]({})'.format(plays, url))
+                await self.bot.say(embed=em)
         else:
             message = 'No API key set for Last.fm. Get one at http://www.last.fm/api'
-        await self.bot.say('```{}```'.format(message))
+            await self.bot.say(message)
 
     @_lastfm.command(pass_context=True, no_pm=True, name='topalbums', aliases=['albums', 'tab'])
     async def _topalbums(self, context, *username: str):
-        """Top 10 played albums"""
+        """Shows most played albums"""
         if self.api_key != '':
             if not username:
                 settings = dataIO.load_json(self.settings_file)
@@ -250,28 +304,29 @@ Will remember your username after setting one. [p]lastfm last @username will bec
                 payload = self.payload
                 payload['method'] = 'user.getTopAlbums'
                 payload['username'] = username
-                headers = {'user-agent': 'Red-cog/1.0'}
-                url = 'http://ws.audioscrobbler.com/2.0/?'
-                conn = aiohttp.TCPConnector(verify_ssl=False)
-                session = aiohttp.ClientSession(connector=conn)
-                async with session.get(url, params=payload, headers=headers) as r:
-                    data = await r.json()
-                    print('ayy')
-                session.close()
+                data = await self._api_request(payload)
             except Exception as e:
                 message = 'Something went terribly wrong! [{}]'.format(e)
+
             if 'error' in data:
-                message = '{}'.format(data['message'])
+                message = data['message']
+                await self.bot.say(message)
             else:
                 user = data['topalbums']['@attr']['user']
-                message = 'Top albums played by {0}\n\n'.format(user)
+                author = context.message.author
+                em = discord.Embed(description='\a\n\n', url='http://www.last.fm/user/{}/library/albums'.format(user))
+                avatar = author.avatar_url if author.avatar else author.default_avatar_url
+                em.set_author(name='Top Albums by {}'.format(user), icon_url=avatar)
                 for i, album in enumerate(data['topalbums']['album'], 1):
                     albums = album['name']
                     artist = album['artist']['name']
-                    message += '{} {} by {}\n'.format(str(i).ljust(4), albums, artist)
+                    url = album['url']
+                    plays = album['playcount']
+                    em.add_field(name='{}) {}'.format(str(i), albums), value='[{} ({} plays)]({})'.format(artist, plays, url))
+                await self.bot.say(embed=em)
         else:
-            message = 'No API key set. Get one at http://www.last.fm/api'
-        await self.bot.say('```{}```'.format(message))
+            message = 'No API key set for Last.fm. Get one at http://www.last.fm/api'
+            await self.bot.say(message)
 
     @_lastfm.command(pass_context=True, name='apikey')
     @checks.is_owner()
