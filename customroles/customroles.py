@@ -72,7 +72,7 @@ class CustomRoles:
                     if role.permissions.value < 1:
                         try:
                             await self.bot.add_roles(author, role)
-                            message = 'Role `{}` applied to {}'.format(role.name, author.name)
+                            message = 'Role `{}` applied to {}'.format(role.name, author.display_name)
                             break
                         except discord.Forbidden:
                             message = 'I have no permissions to do that. Please give me role managing permissions.'
@@ -96,7 +96,7 @@ class CustomRoles:
                 if role.name.lower() == name.lower():
                     try:
                         await self.bot.remove_roles(author, role)
-                        message = 'Role `{}` removed from {}'.format(role.name, author.name)
+                        message = 'Role `{}` removed from {}'.format(role.name, author.display_name)
                         break
                     except discord.Forbidden:
                         message = 'I have no permissions to do that. Please give me role managing permissions.'
