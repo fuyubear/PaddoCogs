@@ -151,7 +151,6 @@ Will remember your username after setting one. [p]lastfm last @username will bec
                         em.set_author(name='{} - {}'.format(artist, song), icon_url=avatar)
                         em.set_image(url=image)
                         await self.bot.say(embed=em)
-
                 except KeyError:
                     await self.bot.say('{} is not playing any song right now'.format(user))
         else:
@@ -190,12 +189,12 @@ Will remember your username after setting one. [p]lastfm last @username will bec
                 avatar = author.avatar_url if author.avatar else author.default_avatar_url
                 em.set_author(name='Recent Tracks by {}'.format(user), icon_url=avatar)
                 for i, track in enumerate(data['recenttracks']['track'], 1):
-                    if i > 15:
-                        break
                     artist = track['artist']['#text']
                     song = track['name']
                     url = track['url']
                     em.add_field(name='{}) {}'.format(str(i), song), value='[{}]({})'.format(artist, url))
+                    if i > 14:
+                        break
                 await self.bot.say(embed=em)
         else:
             message = 'No API key set for Last.fm. Get one at http://www.last.fm/api'
@@ -238,6 +237,8 @@ Will remember your username after setting one. [p]lastfm last @username will bec
                     url = track['url']
                     plays = track['playcount']
                     em.add_field(name='{}) {}'.format(str(i), song), value='[{} ({} plays)]({})'.format(artist, plays, url))
+                    if i > 14:
+                        break
                 await self.bot.say(embed=em)
         else:
             message = 'No API key set for Last.fm. Get one at http://www.last.fm/api'
@@ -280,6 +281,8 @@ Will remember your username after setting one. [p]lastfm last @username will bec
                     url = artist['url']
                     plays = artist['playcount']
                     em.add_field(name='{}) {}'.format(str(i), artist_a), value='[{} plays]({})'.format(plays, url))
+                    if i > 14:
+                        break
                 await self.bot.say(embed=em)
         else:
             message = 'No API key set for Last.fm. Get one at http://www.last.fm/api'
@@ -323,6 +326,8 @@ Will remember your username after setting one. [p]lastfm last @username will bec
                     url = album['url']
                     plays = album['playcount']
                     em.add_field(name='{}) {}'.format(str(i), albums), value='[{} ({} plays)]({})'.format(artist, plays, url))
+                    if i > 14:
+                        break
                 await self.bot.say(embed=em)
         else:
             message = 'No API key set for Last.fm. Get one at http://www.last.fm/api'
