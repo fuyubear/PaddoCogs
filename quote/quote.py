@@ -19,10 +19,10 @@ class Quote:
             message = await self.bot.get_message(channel, str(message_id))
             content = '\a\n'+message.clean_content
             author = message.author
-            timestamp = message.timestamp.strftime('%Y-%m-%d %H:%M:%S')
+            timestamp = message.timestamp.strftime('%Y-%m-%A %H:%M:%S')
             avatar = author.avatar_url if author.avatar else author.default_avatar_url
             em = discord.Embed(description=content, color=discord.Color.blue())
-            em.set_author(name='{} at {} said:'.format(author.name, timestamp), icon_url=avatar)
+            em.set_author(name='Quote from: {} on {}'.format(author.name, timestamp), icon_url=avatar)
             await self.bot.say(embed=em)
         except discord.NotFound:
             em = discord.Embed(description='I\'m sorry, that message doesn\'t exist', color=discord.Color.red())
