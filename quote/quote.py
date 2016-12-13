@@ -22,7 +22,7 @@ class Quote:
             timestamp = message.timestamp.strftime('%Y-%m-%d %H:%M:%S')
             avatar = author.avatar_url if author.avatar else author.default_avatar_url
             em = discord.Embed(description=content, color=discord.Color.blue())
-            em.set_author('{} at {} said:'.format(author.name, timestamp), icon_url=avatar)
+            em.set_author(name='{} at {} said:'.format(author.name, timestamp), icon_url=avatar)
             await self.bot.say(embed=em)
         except discord.NotFound:
             em = discord.Embed(description='I\'m sorry, that message doesn\'t exist', color=discord.Color.red())
