@@ -21,7 +21,7 @@ class Seen:
             data = {}
             data['TIMESTAMP'] = '{} {}:{}:{}'.format(ts.date(), ts.hour, ts.minute, ts.second)
             data['MESSAGE'] = message.clean_content
-            data['CHANNEL'] = channel.mention
+            data['CHANNEL'] = channel.id
             dataIO.save_json(filename, data)
 
     @commands.command(pass_context=True, no_pm=True, name='seen')

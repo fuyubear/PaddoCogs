@@ -60,7 +60,7 @@ class Statistics:
 
     @commands.command(no_pm=True)
     @checks.serverowner_or_permissions(manage_server=True)
-    async def statschannel(self, *channel: discord.Channel):
+    async def statschannel(self, channel: discord.Channel):
         """
         Set the channel to which the bot will sent its continues updates.
         Example: [p]statschannel #statistics
@@ -73,7 +73,10 @@ class Statistics:
             message = 'No channel set!'
         else:
             channel = discord.utils.get(self.bot.get_all_channels(), id=self.settings['CHANNEL_ID'])
-            message = 'Current channel is {}'.format(channel.mention)
+            if channel:
+                message = 'Current channel is {}'.format(channel.mention)
+            else:
+                message = 'That channel doesn\'t exist anymore.'
         await self.bot.say(message)
 
     async def retrieve_statistics(self):
