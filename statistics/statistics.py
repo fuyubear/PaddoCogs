@@ -66,9 +66,9 @@ class Statistics:
         Example: [p]statschannel #statistics
         """
         if channel:
-            self.settings['CHANNEL_ID'] = str(channel[0].id)
+            self.settings['CHANNEL_ID'] = str(channel.id)
             dataIO.save_json('data/statistics/settings.json', self.settings)
-            message = 'Channel set to {}'.format(channel[0].mention)
+            message = 'Channel set to {}'.format(channel.mention)
         elif not self.settings['CHANNEL_ID']:
             message = 'No channel set!'
         else:
