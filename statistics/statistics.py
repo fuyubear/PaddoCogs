@@ -65,7 +65,7 @@ class Statistics:
         Set the channel to which the bot will sent its continues updates.
         Example: [p]statschannel #statistics
         """
-        if len(channel) > 0:
+        if channel:
             self.settings['CHANNEL_ID'] = str(channel[0].id)
             dataIO.save_json('data/statistics/settings.json', self.settings)
             message = 'Channel set to {}'.format(channel[0].mention)
