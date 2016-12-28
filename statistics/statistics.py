@@ -1,7 +1,8 @@
-from cogs.utils.dataIO import dataIO
+
 from discord.ext import commands
 from __main__ import send_cmd_help
-from cogs.utils.chat_formatting import box
+from .utils.chat_formatting import box
+from .utils.dataIO import dataIO
 from .utils import checks
 import datetime
 import asyncio
@@ -44,6 +45,7 @@ class Statistics:
 
         Default: 5
         """
+
         if not self.refresh_rate:  # If statement incase someone removes it or sets it to 0
             self.refresh_rate = 5
 
@@ -73,7 +75,7 @@ class Statistics:
             dataIO.save_json('data/statistics/settings.json', self.settings)
             message = 'Channel set to {}'.format(channel.mention)
         elif not self.settings['CHANNEL_ID']:
-            message = None
+            message = box("No Channel set")
             await send_cmd_help(ctx)
         else:
             channel = discord.utils.get(
@@ -82,11 +84,11 @@ class Statistics:
                 message = box('Current channel is #{}'.format(channel))
                 await send_cmd_help(ctx)
             else:
-                message = '{} got deleted.'.format(channel)
                 self.settings['CHANNEL_ID'] = None
+                message = box("No Channel set")
+                await send_cmd_help(ctx)
 
-        if message:
-            await self.bot.say(message)
+        await self.bot.say(message)
 
     async def retrieve_statistics(self):
         name = self.bot.user.name
