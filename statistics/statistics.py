@@ -58,9 +58,9 @@ class Statistics:
                 message = '`Changed refresh rate to {} seconds`'.format(self.refresh_rate)
         await self.bot.say(message)
 
-    @commands.command(no_pm=True)
+    @commands.command(no_pm=True, pass_context=True)
     @checks.serverowner_or_permissions(manage_server=True)
-    async def statschannel(self, channel: discord.Channel):
+    async def statschannel(self, ctx, channel: discord.Channel = None):
         """
         Set the channel to which the bot will sent its continues updates.
         Example: [p]statschannel #statistics
@@ -70,13 +70,15 @@ class Statistics:
             dataIO.save_json('data/statistics/settings.json', self.settings)
             message = 'Channel set to {}'.format(channel.mention)
         elif not self.settings['CHANNEL_ID']:
-            message = 'No channel set!'
+            message = 'No Channel set.\nUse `{}statschannel [Channel]` to set a channel'.format(ctx.prefix)
         else:
-            channel = discord.utils.get(self.bot.get_all_channels(), id=self.settings['CHANNEL_ID'])
+            channel = discord.utils.get(
+                self.bot.get_all_channels(), id=self.settings['CHANNEL_ID'])
             if channel:
-                message = 'Current channel is {}'.format(channel.mention)
+                message = 'Current channel is #{}'.format(channel)
             else:
-                message = 'That channel doesn\'t exist anymore.'
+                message = 'Current channel got deleted.'
+                self.settings['CHANNEL_ID'] = None
         await self.bot.say(message)
 
     async def retrieve_statistics(self):
