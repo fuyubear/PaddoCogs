@@ -19,6 +19,7 @@ class Statistics:
     """
     Statistics
     """
+
     def __init__(self, bot):
         self.bot = bot
         self.settings = dataIO.load_json('data/statistics/settings.json')
@@ -35,7 +36,7 @@ class Statistics:
         await self.bot.say(embed=message)
 
     @commands.command(pass_context=True)
-    async def statsrefresh(self, ctx, seconds: int = 0):
+    async def statsrefresh(self, ctx, seconds: int=0):
         """
         Set the refresh rate by which the statistics are updated
 
@@ -43,11 +44,12 @@ class Statistics:
 
         Default: 5
         """
-        if not self.refresh_rate: #If statement incase someone removes it or sets it to 0
+        if not self.refresh_rate:  # If statement incase someone removes it or sets it to 0
             self.refresh_rate = 5
 
         if seconds == 0:
-            message = box("Current refresh rate is {}".format(self.refresh_rate))
+            message = box(
+                "Current refresh rate is {}".format(self.refresh_rate))
             await send_cmd_help(ctx)
         elif seconds < 5:
             message = '`I can\'t do that, the refresh rate has to be above 5 seconds`'
@@ -55,12 +57,13 @@ class Statistics:
             self.refresh_rate = seconds
             self.settings['REFRESH_RATE'] = self.refresh_rate
             dataIO.save_json('data/statistics/settings.json', self.settings)
-            message = '`Changed refresh rate to {} seconds`'.format(self.refresh_rate)
+            message = '`Changed refresh rate to {} seconds`'.format(
+                self.refresh_rate)
         await self.bot.say(message)
 
     @commands.command(no_pm=True, pass_context=True)
     @checks.serverowner_or_permissions(manage_server=True)
-    async def statschannel(self, ctx, channel: discord.Channel = None):
+    async def statschannel(self, ctx, channel: discord.Channel=None):
         """
         Set the channel to which the bot will sent its continues updates.
         Example: [p]statschannel #statistics
@@ -93,15 +96,15 @@ class Statistics:
             uptime = time.time() - time.mktime(self.bot.uptime.timetuple())
         up = datetime.timedelta(seconds=uptime)
         days = up.days
-        hours = int(up.seconds/3600)
-        minutes = int(up.seconds % 3600/60)
+        hours = int(up.seconds / 3600)
+        minutes = int(up.seconds % 3600 / 60)
         users = str(len(set(self.bot.get_all_members())))
         servers = str(len(self.bot.servers))
         text_channels = 0
         voice_channels = 0
 
         cpu_p = psutil.cpu_percent(interval=None, percpu=True)
-        cpu_usage = sum(cpu_p)/len(cpu_p)
+        cpu_usage = sum(cpu_p) / len(cpu_p)
 
         mem_v = psutil.virtual_memory()
 
@@ -116,7 +119,8 @@ class Statistics:
         avatar = self.bot.user.avatar_url if self.bot.user.avatar else self.bot.user.default_avatar_url
         em.set_author(name='Statistics of {}'.format(name), icon_url=avatar)
 
-        em.add_field(name='**Uptime**', value='{} D - {} H - {} M'.format(str(days), str(hours), str(minutes)))
+        em.add_field(
+            name='**Uptime**', value='{} D - {} H - {} M'.format(str(days), str(hours), str(minutes)))
 
         em.add_field(name='**Users**', value=users)
         em.add_field(name='**Servers**', value=servers)
@@ -125,7 +129,8 @@ class Statistics:
         em.add_field(name='**Text channels**', value=str(text_channels))
         em.add_field(name='**Voice channels**', value=str(voice_channels))
 
-        em.add_field(name='**Messages received**', value=str(self.received_messages))
+        em.add_field(name='**Messages received**',
+                     value=str(self.received_messages))
         em.add_field(name='**Messages sent**', value=str(self.sent_messages))
         em.add_field(name='\a', value='\a')
 
@@ -135,7 +140,8 @@ class Statistics:
 
         em.add_field(name='\a', value='\a', inline=False)
         em.add_field(name='**CPU usage**', value='{0:.1f}%'.format(cpu_usage))
-        em.add_field(name='**Memory usage**', value='{0:.1f}%'.format(mem_v.percent))
+        em.add_field(name='**Memory usage**',
+                     value='{0:.1f}%'.format(mem_v.percent))
 
         em.add_field(name='\a', value='\a')
         em.set_footer(text='API version {}'.format(discord.__version__))
@@ -155,7 +161,8 @@ class Statistics:
         while self == self.bot.get_cog('Statistics'):
             if self.settings['CHANNEL_ID']:
                 msg = await self.retrieve_statistics()
-                channel = discord.utils.get(self.bot.get_all_channels(), id=self.settings['CHANNEL_ID'])
+                channel = discord.utils.get(
+                    self.bot.get_all_channels(), id=self.settings['CHANNEL_ID'])
                 messages = False
                 async for message in self.bot.logs_from(channel, limit=1):
                     messages = True
@@ -188,7 +195,8 @@ def check_file():
 
 def setup(bot):
     if psutil is False:
-        raise RuntimeError("psutil is not installed. Do 'pip3 install psutil --upgrade' to use this cog.")
+        raise RuntimeError(
+            "psutil is not installed. Do 'pip3 install psutil --upgrade' to use this cog.")
     else:
         check_folder()
         check_file()
