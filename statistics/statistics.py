@@ -1,5 +1,7 @@
 from cogs.utils.dataIO import dataIO
 from discord.ext import commands
+from __main__ import send_cmd_help
+from cogs.utils.chat_formatting import box
 from .utils import checks
 import datetime
 import asyncio
@@ -24,13 +26,6 @@ class Statistics:
         self.received_messages = self.settings['RECEIVED_MESSAGES']
         self.refresh_rate = self.settings['REFRESH_RATE']
 
-    async def _int(self, n):
-        try:
-            int(n)
-            return True
-        except ValueError:
-            return False
-
     @commands.command()
     async def stats(self):
         """
@@ -39,8 +34,8 @@ class Statistics:
         message = await self.retrieve_statistics()
         await self.bot.say(embed=message)
 
-    @commands.command()
-    async def statsrefresh(self, seconds: int):
+    @commands.command(pass_context=True)
+    async def statsrefresh(self, ctx, seconds: int = 0):
         """
         Set the refresh rate by which the statistics are updated
 
@@ -48,14 +43,19 @@ class Statistics:
 
         Default: 5
         """
-        if await self._int(seconds):
-            if seconds < 5:
-                message = '`I can\'t do that, the refresh rate has to be above 5 seconds`'
-            else:
-                self.refresh_rate = seconds
-                self.settings['REFRESH_RATE'] = self.refresh_rate
-                dataIO.save_json('data/statistics/settings.json', self.settings)
-                message = '`Changed refresh rate to {} seconds`'.format(self.refresh_rate)
+        if not self.refresh_rate: #If statement incase someone removes it or sets it to 0
+            self.refresh_rate = 5
+
+        if seconds == 0:
+            message = box("Current refresh rate is {}".format(self.refresh_rate))
+            await send_cmd_help(ctx)
+        elif seconds < 5:
+            message = '`I can\'t do that, the refresh rate has to be above 5 seconds`'
+        else:
+            self.refresh_rate = seconds
+            self.settings['REFRESH_RATE'] = self.refresh_rate
+            dataIO.save_json('data/statistics/settings.json', self.settings)
+            message = '`Changed refresh rate to {} seconds`'.format(self.refresh_rate)
         await self.bot.say(message)
 
     @commands.command(no_pm=True, pass_context=True)
@@ -70,16 +70,20 @@ class Statistics:
             dataIO.save_json('data/statistics/settings.json', self.settings)
             message = 'Channel set to {}'.format(channel.mention)
         elif not self.settings['CHANNEL_ID']:
-            message = 'No Channel set.\nUse `{}statschannel [Channel]` to set a channel'.format(ctx.prefix)
+            message = None
+            await send_cmd_help(ctx)
         else:
             channel = discord.utils.get(
                 self.bot.get_all_channels(), id=self.settings['CHANNEL_ID'])
             if channel:
-                message = 'Current channel is #{}'.format(channel)
+                message = box('Current channel is #{}'.format(channel))
+                await send_cmd_help(ctx)
             else:
-                message = 'Current channel got deleted.'
+                message = '{} got deleted.'.format(channel)
                 self.settings['CHANNEL_ID'] = None
-        await self.bot.say(message)
+
+        if message:
+            await self.bot.say(message)
 
     async def retrieve_statistics(self):
         name = self.bot.user.name
