@@ -43,6 +43,7 @@ class Statistics:
         Example: [p]statsrefresh 42
 
         Default: 5
+
         """
 
         if not self.refresh_rate:  # If statement incase someone removes it or sets it to 0
@@ -67,11 +68,12 @@ class Statistics:
         """
         Set the channel to which the bot will sent its continues updates.
         Example: [p]statschannel #statistics
+
         """
         if channel:
             self.settings['CHANNEL_ID'] = str(channel.id)
             dataIO.save_json('data/statistics/settings.json', self.settings)
-            message = 'Channel set to {}'.format(channel.name)
+            message = "Channel set to {}".format(channel.mention)
         elif not self.settings['CHANNEL_ID']:
             message = "```\nNo Channel set```"
             await send_cmd_help(context)
@@ -79,11 +81,11 @@ class Statistics:
             channel = discord.utils.get(
                 self.bot.get_all_channels(), id=self.settings['CHANNEL_ID'])
             if channel:
-                message = '```\nCurrent channel is #{}```'.format(channel.name)
+                message = 'Current channel is #{}'.format(channel.mention)
                 await send_cmd_help(context)
             else:
                 self.settings['CHANNEL_ID'] = None
-                message = "```\nNo Channel set```"
+                message = "No Channel set"
                 await send_cmd_help(context)
 
         await self.bot.say(message)
