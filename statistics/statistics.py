@@ -49,7 +49,7 @@ class Statistics:
             self.refresh_rate = 5
 
         if seconds == 0:
-            message = '\nCurrent refresh rate is {}'.format(self.refresh_rate)
+            message = 'Current refresh rate is {}'.format(self.refresh_rate)
             await send_cmd_help(context)
         elif seconds < 5:
             message = '`I can\'t do that, the refresh rate has to be above 5 seconds`'
@@ -73,7 +73,7 @@ class Statistics:
             dataIO.save_json('data/statistics/settings.json', self.settings)
             message = 'Channel set to {}'.format(channel.mention)
         elif not self.settings['CHANNEL_ID']:
-            message = '```\nNo Channel set```'
+            message = 'No Channel set'
             await send_cmd_help(context)
         else:
             channel = discord.utils.get(
