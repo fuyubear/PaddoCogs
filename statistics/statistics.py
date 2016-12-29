@@ -43,14 +43,13 @@ class Statistics:
         Example: [p]statsrefresh 42
 
         Default: 5
-
         """
 
         if not self.refresh_rate:  # If statement incase someone removes it or sets it to 0
             self.refresh_rate = 5
 
         if seconds == 0:
-            message = "```\nCurrent refresh rate is {}```".format(self.refresh_rate)
+            message = '\nCurrent refresh rate is {}'.format(self.refresh_rate)
             await send_cmd_help(context)
         elif seconds < 5:
             message = '`I can\'t do that, the refresh rate has to be above 5 seconds`'
@@ -68,14 +67,13 @@ class Statistics:
         """
         Set the channel to which the bot will sent its continues updates.
         Example: [p]statschannel #statistics
-
         """
         if channel:
             self.settings['CHANNEL_ID'] = str(channel.id)
             dataIO.save_json('data/statistics/settings.json', self.settings)
-            message = "Channel set to {}".format(channel.mention)
+            message = 'Channel set to {}'.format(channel.mention)
         elif not self.settings['CHANNEL_ID']:
-            message = "```\nNo Channel set```"
+            message = '```\nNo Channel set```'
             await send_cmd_help(context)
         else:
             channel = discord.utils.get(
@@ -85,7 +83,7 @@ class Statistics:
                 await send_cmd_help(context)
             else:
                 self.settings['CHANNEL_ID'] = None
-                message = "No Channel set"
+                message = 'No channel set'
                 await send_cmd_help(context)
 
         await self.bot.say(message)
@@ -178,9 +176,9 @@ class Statistics:
 
 
 def check_folder():
-    if not os.path.exists("data/statistics"):
-        print("Creating data/statistics folder...")
-        os.makedirs("data/statistics")
+    if not os.path.exists('data/statistics'):
+        print('Creating data/statistics folder...')
+        os.makedirs('data/statistics')
 
 
 def check_file():
@@ -189,20 +187,19 @@ def check_file():
     data['SENT_MESSAGES'] = 0
     data['RECEIVED_MESSAGES'] = 0
     data['REFRESH_RATE'] = 5
-    f = "data/statistics/settings.json"
+    f = 'data/statistics/settings.json'
     if not dataIO.is_valid_json(f):
-        print("Creating default settings.json...")
+        print('Creating default settings.json...')
         dataIO.save_json(f, data)
 
 
 def setup(bot):
     if psutil is False:
-        raise RuntimeError(
-            "psutil is not installed. Do 'pip3 install psutil --upgrade' to use this cog.")
+        raise RuntimeError('psutil is not installed. Run `pip3 install psutil --upgrade` to use this cog.')
     else:
         check_folder()
         check_file()
         n = Statistics(bot)
         bot.add_cog(n)
-        bot.add_listener(n.incoming_messages, "on_message")
+        bot.add_listener(n.incoming_messages, 'on_message')
         bot.loop.create_task(n.reload_stats())
