@@ -1,7 +1,6 @@
 
 from discord.ext import commands
 from __main__ import send_cmd_help
-from .utils.chat_formatting import box
 from .utils.dataIO import dataIO
 from .utils import checks
 import datetime
@@ -37,7 +36,7 @@ class Statistics:
         await self.bot.say(embed=message)
 
     @commands.command(pass_context=True)
-    async def statsrefresh(self, ctx, seconds: int=0):
+    async def statsrefresh(self, context, seconds: int=0):
         """
         Set the refresh rate by which the statistics are updated
 
@@ -50,9 +49,8 @@ class Statistics:
             self.refresh_rate = 5
 
         if seconds == 0:
-            message = box(
-                "Current refresh rate is {}".format(self.refresh_rate))
-            await send_cmd_help(ctx)
+            message = "```\nCurrent refresh rate is {}```".format(self.refresh_rate)
+            await send_cmd_help(context)
         elif seconds < 5:
             message = '`I can\'t do that, the refresh rate has to be above 5 seconds`'
         else:
@@ -65,7 +63,7 @@ class Statistics:
 
     @commands.command(no_pm=True, pass_context=True)
     @checks.serverowner_or_permissions(manage_server=True)
-    async def statschannel(self, ctx, channel: discord.Channel=None):
+    async def statschannel(self, context, channel: discord.Channel=None):
         """
         Set the channel to which the bot will sent its continues updates.
         Example: [p]statschannel #statistics
@@ -73,20 +71,20 @@ class Statistics:
         if channel:
             self.settings['CHANNEL_ID'] = str(channel.id)
             dataIO.save_json('data/statistics/settings.json', self.settings)
-            message = 'Channel set to {}'.format(channel.mention)
+            message = 'Channel set to {}'.format(channel.name)
         elif not self.settings['CHANNEL_ID']:
-            message = box("No Channel set")
-            await send_cmd_help(ctx)
+            message = "```\nNo Channel set```"
+            await send_cmd_help(context)
         else:
             channel = discord.utils.get(
                 self.bot.get_all_channels(), id=self.settings['CHANNEL_ID'])
             if channel:
-                message = box('Current channel is #{}'.format(channel))
-                await send_cmd_help(ctx)
+                message = '```\nCurrent channel is #{}```'.format(channel.name)
+                await send_cmd_help(context)
             else:
                 self.settings['CHANNEL_ID'] = None
-                message = box("No Channel set")
-                await send_cmd_help(ctx)
+                message = "```\nNo Channel set```"
+                await send_cmd_help(context)
 
         await self.bot.say(message)
 
