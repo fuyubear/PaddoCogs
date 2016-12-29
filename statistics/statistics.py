@@ -81,7 +81,7 @@ class Statistics:
             channel = discord.utils.get(
                 self.bot.get_all_channels(), id=self.settings['CHANNEL_ID'])
             if channel:
-                message = 'Current channel is #{}'.format(channel.mention)
+                message = 'Current channel is {}'.format(channel.mention)
                 await send_cmd_help(context)
             else:
                 self.settings['CHANNEL_ID'] = None
