@@ -24,7 +24,7 @@ class Quote:
             em = discord.Embed(description=content, color=discord.Color.blue())
             em.set_author(name='Quote from: {} on {}'.format(author.name, timestamp), icon_url=avatar)
             if message:
-                await self.bot.say(''.join(text), embed=em)
+                await self.bot.say(' '.join(text), embed=em)
             else:
                 await self.bot.say(embed=em)
         except discord.NotFound:
