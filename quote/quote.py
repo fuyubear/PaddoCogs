@@ -10,7 +10,7 @@ class Quote:
         self.bot = bot
 
     @commands.command(pass_context=True, name='quote')
-    async def _q(self, context, message_id: int):
+    async def _q(self, context, message_id: int, *, message):
         """
         Quote someone with the message id. To get the message id you need to enable developer mode.
         """
@@ -27,6 +27,8 @@ class Quote:
         except discord.NotFound:
             em = discord.Embed(description='I\'m sorry, that message doesn\'t exist', color=discord.Color.red())
             await self.bot.say(embed=em)
+            if message:
+                await self.bot.say(''.join(message))
         except Exception as error:
             await self.bot.say(error)
 
