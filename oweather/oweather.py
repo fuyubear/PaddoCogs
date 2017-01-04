@@ -27,7 +27,7 @@ class Weather:
                 session.close()
                 if parse['status'] == 'OK':
                     return datetime.datetime.fromtimestamp(int(parse['timestamp'])-7200).strftime('%Y-%m-%d %H:%M')
-        return
+        return False
 
     @commands.command(pass_context=True, name='weather', aliases=['we'])
     async def _weather(self, context, *arguments: str):
