@@ -19,7 +19,6 @@ class Lastfm:
         self.payload = {}
         self.payload['api_key'] = self.api_key
         self.payload['format'] = 'json'
-        self.payload['limit'] = '15'
 
     async def _api_request(self, payload):
         url = 'http://ws.audioscrobbler.com/2.0/?'
@@ -174,6 +173,7 @@ Will remember your username after setting one. [p]lastfm last @username will bec
                     username = user_patch
             try:
                 payload = self.payload
+                payload['limit'] = '11'
                 payload['method'] = 'user.getRecentTracks'
                 payload['username'] = username
                 data = await self._api_request(payload)
@@ -185,16 +185,20 @@ Will remember your username after setting one. [p]lastfm last @username will bec
             else:
                 user = data['recenttracks']['@attr']['user']
                 author = context.message.author
-                em = discord.Embed(description='\a\n\n', url='http://www.last.fm/user/{}/library'.format(user))
-                avatar = author.avatar_url if author.avatar else author.default_avatar_url
-                em.set_author(name='Recent Tracks by {}'.format(user), icon_url=avatar)
+                l = ''
                 for i, track in enumerate(data['recenttracks']['track'], 1):
                     artist = track['artist']['#text']
                     song = track['name']
                     url = track['url']
-                    em.add_field(name='{}) {}'.format(str(i), song), value='[{}]({})'.format(artist, url))
-                    if i > 14:
+                    if i < 10:
+                        l += '`{}`\t  **[{}]({})** by **{}**\n'.format(str(i), song, url, artist)
+                    elif i > 10:
                         break
+                    else:
+                        l += '`{}`\t**[{}]({})** by **{}**\n'.format(str(i), song, url, artist)
+                em = discord.Embed(description=l, url='http://www.last.fm/user/{}/library'.format(user))
+                avatar = author.avatar_url if author.avatar else author.default_avatar_url
+                em.set_author(name='{}\'s Recent Tracks'.format(user), icon_url=avatar)
                 await self.bot.say(embed=em)
         else:
             message = 'No API key set for Last.fm. Get one at http://www.last.fm/api'
@@ -217,6 +221,7 @@ Will remember your username after setting one. [p]lastfm last @username will bec
                     username = user_patch
             try:
                 payload = self.payload
+                payload['limit'] = '11'
                 payload['method'] = 'user.getTopTracks'
                 payload['username'] = username
                 data = await self._api_request(payload)
@@ -228,17 +233,21 @@ Will remember your username after setting one. [p]lastfm last @username will bec
             else:
                 user = data['toptracks']['@attr']['user']
                 author = context.message.author
-                em = discord.Embed(description='\a\n\n', url='http://www.last.fm/user/{}/library/tracks'.format(user))
-                avatar = author.avatar_url if author.avatar else author.default_avatar_url
-                em.set_author(name='Top Tracks by {}'.format(user), icon_url=avatar)
+                l = ''
                 for i, track in enumerate(data['toptracks']['track'], 1):
                     artist = track['artist']['name']
                     song = track['name']
                     url = track['url']
                     plays = track['playcount']
-                    em.add_field(name='{}) {}'.format(str(i), song), value='[{} ({} plays)]({})'.format(artist, plays, url))
-                    if i > 14:
+                    if i < 10:
+                        l += '`{}`\t  **[{}]({})** by **{}** ({} plays)\n'.format(str(i), song, url, artist, plays)
+                    elif i > 10:
                         break
+                    else:
+                        l += '`{}`\t**[{}]({})** by **{}** ({} plays)\n'.format(str(i), song, url, artist, plays)
+                em = discord.Embed(description=l, url='http://www.last.fm/user/{}/library/tracks'.format(user))
+                avatar = author.avatar_url if author.avatar else author.default_avatar_url
+                em.set_author(name='{}\'s Top Tracks'.format(user), icon_url=avatar)
                 await self.bot.say(embed=em)
         else:
             message = 'No API key set for Last.fm. Get one at http://www.last.fm/api'
@@ -261,28 +270,32 @@ Will remember your username after setting one. [p]lastfm last @username will bec
                     username = user_patch
             try:
                 payload = self.payload
+                payload['limit'] = '11'
                 payload['method'] = 'user.getTopArtists'
                 payload['username'] = username
                 data = await self._api_request(payload)
             except Exception as e:
                 message = 'Something went terribly wrong! [{}]'.format(e)
-
             if 'error' in data:
                 message = data['message']
                 await self.bot.say(message)
             else:
                 user = data['topartists']['@attr']['user']
                 author = context.message.author
-                em = discord.Embed(description='\a\n\n', url='http://www.last.fm/user/{}/library/artists'.format(user))
-                avatar = author.avatar_url if author.avatar else author.default_avatar_url
-                em.set_author(name='Top Artists by {}'.format(user), icon_url=avatar)
+                l = ''
                 for i, artist in enumerate(data['topartists']['artist'], 1):
                     artist_a = artist['name']
                     url = artist['url']
                     plays = artist['playcount']
-                    em.add_field(name='{}) {}'.format(str(i), artist_a), value='[{} plays]({})'.format(plays, url))
-                    if i > 14:
+                    if i < 10:
+                        l += '`{}`\t  **[{}]({})** ({} plays)\n'.format(str(i), artist_a, url, plays)
+                    elif i > 10:
                         break
+                    else:
+                        l += '`{}`\t**[{}]({})** ({} plays)\n'.format(str(i), artist_a, url, plays)
+                em = discord.Embed(description=l, url='http://www.last.fm/user/{}/library/artists'.format(user))
+                avatar = author.avatar_url if author.avatar else author.default_avatar_url
+                em.set_author(name='{}\'s Top Artists'.format(user), icon_url=avatar)
                 await self.bot.say(embed=em)
         else:
             message = 'No API key set for Last.fm. Get one at http://www.last.fm/api'
@@ -305,6 +318,7 @@ Will remember your username after setting one. [p]lastfm last @username will bec
                     username = user_patch
             try:
                 payload = self.payload
+                payload['limit'] = '11'
                 payload['method'] = 'user.getTopAlbums'
                 payload['username'] = username
                 data = await self._api_request(payload)
@@ -317,17 +331,21 @@ Will remember your username after setting one. [p]lastfm last @username will bec
             else:
                 user = data['topalbums']['@attr']['user']
                 author = context.message.author
-                em = discord.Embed(description='\a\n\n', url='http://www.last.fm/user/{}/library/albums'.format(user))
-                avatar = author.avatar_url if author.avatar else author.default_avatar_url
-                em.set_author(name='Top Albums by {}'.format(user), icon_url=avatar)
+                l = ''
                 for i, album in enumerate(data['topalbums']['album'], 1):
                     albums = album['name']
                     artist = album['artist']['name']
                     url = album['url']
                     plays = album['playcount']
-                    em.add_field(name='{}) {}'.format(str(i), albums), value='[{} ({} plays)]({})'.format(artist, plays, url))
-                    if i > 14:
+                    if i < 10:
+                        l += '`{}`\t  **[{}]({})** by **({})** ({} plays)\n'.format(str(i), albums, url, artist, plays)
+                    elif i > 10:
                         break
+                    else:
+                        l += '`{}`\t**[{}]({})** by **({})** ({} plays)\n'.format(str(i), albums, url, artist, plays)
+                em = discord.Embed(description=l, url='http://www.last.fm/user/{}/library/albums'.format(user))
+                avatar = author.avatar_url if author.avatar else author.default_avatar_url
+                em.set_author(name='Top Albums by {}'.format(user), icon_url=avatar)
                 await self.bot.say(embed=em)
         else:
             message = 'No API key set for Last.fm. Get one at http://www.last.fm/api'
