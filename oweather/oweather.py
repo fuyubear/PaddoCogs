@@ -30,15 +30,15 @@ class Weather:
         return False
 
     @commands.command(pass_context=True, name='weather', aliases=['we'])
-    async def _weather(self, context, *arguments: str):
+    async def _weather(self, context, *location: str):
         """Get the weather!"""
         settings = dataIO.load_json(self.settings_file)
         api_key = settings['WEATHER_API_KEY']
-        if len(arguments) == 0:
+        if len(location) == 0:
             message = 'No location provided.'
         elif api_key != '':
             try:
-                payload = {'q': " ".join(arguments), 'appid': api_key}
+                payload = {'q': " ".join(location), 'appid': api_key}
                 url = 'http://api.openweathermap.org/data/2.5/weather?'
                 headers = {'user-agent': 'Red-cog/1.0'}
                 conn = aiohttp.TCPConnector(verify_ssl=False)
