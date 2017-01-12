@@ -3,10 +3,8 @@ from discord.ext import commands
 from __main__ import send_cmd_help
 from .utils.dataIO import dataIO
 from .utils import checks
-import datetime
 import asyncio
 import discord
-import time
 import os
 
 try:
@@ -90,14 +88,7 @@ class Statistics:
 
     async def retrieve_statistics(self):
         name = self.bot.user.name
-        try:
-            uptime = abs(self.bot.uptime - int(time.perf_counter()))
-        except TypeError:
-            uptime = time.time() - time.mktime(self.bot.uptime.timetuple())
-        up = datetime.timedelta(seconds=uptime)
-        days = up.days
-        hours = int(up.seconds / 3600)
-        minutes = int(up.seconds % 3600 / 60)
+        uptime = self.get_bot_uptime()
         users = str(len(set(self.bot.get_all_members())))
         servers = str(len(self.bot.servers))
         text_channels = 0
@@ -120,7 +111,7 @@ class Statistics:
         em.set_author(name='Statistics of {}'.format(name), icon_url=avatar)
 
         em.add_field(
-            name='**Uptime**', value='{} D - {} H - {} M'.format(str(days), str(hours), str(minutes)))
+            name='**Uptime**', value='{}'.format(str(uptime)))
 
         em.add_field(name='**Users**', value=users)
         em.add_field(name='**Servers**', value=servers)
