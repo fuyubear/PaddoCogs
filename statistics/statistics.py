@@ -23,8 +23,6 @@ class Statistics:
     def __init__(self, bot):
         self.bot = bot
         self.settings = dataIO.load_json('data/statistics/settings.json')
-        self.sent_messages = self.settings['SENT_MESSAGES']
-        self.received_messages = self.settings['RECEIVED_MESSAGES']
         self.refresh_rate = self.settings['REFRESH_RATE']
 
     @commands.command()
@@ -100,6 +98,8 @@ class Statistics:
         minutes = int(up.seconds % 3600 / 60)
         users = str(len(set(self.bot.get_all_members())))
         servers = str(len(self.bot.servers))
+        commands_run = self.bot.counter[0]['processed_commands']
+        read_messages = self.bot.counter[0]['read_messages']
         text_channels = 0
         voice_channels = 0
 
@@ -130,8 +130,8 @@ class Statistics:
         em.add_field(name='**Voice channels**', value=str(voice_channels))
 
         em.add_field(name='**Messages received**',
-                     value=str(self.received_messages))
-        em.add_field(name='**Messages sent**', value=str(self.sent_messages))
+                     value=str(read_messages))
+        em.add_field(name='**Commands run**', value=str(commands_run))
         em.add_field(name='\a', value='\a')
 
         em.add_field(name='**Active cogs**', value=str(len(self.bot.cogs)))
@@ -146,15 +146,6 @@ class Statistics:
         em.add_field(name='\a', value='\a')
         em.set_footer(text='API version {}'.format(discord.__version__))
         return em
-
-    async def incoming_messages(self, message):
-        if message.author.id == self.bot.user.id:
-            self.sent_messages += 1
-        else:
-            self.received_messages += 1
-        self.settings['SENT_MESSAGES'] = self.sent_messages
-        self.settings['RECEIVED_MESSAGES'] = self.received_messages
-        dataIO.save_json('data/statistics/settings.json', self.settings)
 
     async def reload_stats(self):
         await asyncio.sleep(30)
@@ -201,5 +192,4 @@ def setup(bot):
         check_file()
         n = Statistics(bot)
         bot.add_cog(n)
-        bot.add_listener(n.incoming_messages, 'on_message')
         bot.loop.create_task(n.reload_stats())
