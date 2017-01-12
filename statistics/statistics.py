@@ -98,8 +98,8 @@ class Statistics:
         minutes = int(up.seconds % 3600 / 60)
         users = str(len(set(self.bot.get_all_members())))
         servers = str(len(self.bot.servers))
-        commands_run = self.bot.counter[0]['processed_commands']
-        read_messages = self.bot.counter[0]['read_messages']
+        commands_run = self.bot.counter['processed_commands']
+        read_messages = self.bot.counter['read_messages']
         text_channels = 0
         voice_channels = 0
 
