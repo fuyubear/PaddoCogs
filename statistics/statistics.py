@@ -6,7 +6,6 @@ from .utils import checks
 import datetime
 import asyncio
 import discord
-import time
 import os
 
 try:
@@ -151,9 +150,9 @@ class Statistics:
             else:
                 fmt = '{h} hours, {m} minutes, and {s} seconds'
         else:
-            fmt = '{h}h {m}m {s}s'
+            fmt = '{h} H - {m} M - {s} S'
             if days:
-                fmt = '{d}d ' + fmt
+                fmt = '{d} D - ' + fmt
 
         return fmt.format(d=days, h=hours, m=minutes, s=seconds)
 
