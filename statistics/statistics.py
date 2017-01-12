@@ -88,14 +88,6 @@ class Statistics:
 
     async def retrieve_statistics(self):
         name = self.bot.user.name
-        try:
-            uptime = abs(self.bot.uptime - int(time.perf_counter()))
-        except TypeError:
-            uptime = time.time() - time.mktime(self.bot.uptime.timetuple())
-        up = datetime.timedelta(seconds=uptime)
-        days = up.days
-        hours = int(up.seconds / 3600) - 1  # ?
-        minutes = int(up.seconds % 3600 / 60)
         users = str(len(set(self.bot.get_all_members())))
         servers = str(len(self.bot.servers))
         commands_run = self.bot.counter['processed_commands']
@@ -119,8 +111,7 @@ class Statistics:
         avatar = self.bot.user.avatar_url if self.bot.user.avatar else self.bot.user.default_avatar_url
         em.set_author(name='Statistics of {}'.format(name), icon_url=avatar)
 
-        em.add_field(
-            name='**Uptime**', value='{} D - {} H - {} M'.format(str(days), str(hours), str(minutes)))
+        em.add_field(name='**Uptime**', value='{}'.format(self.get_bot_uptime(brief=True)))
 
         em.add_field(name='**Users**', value=users)
         em.add_field(name='**Servers**', value=servers)
@@ -140,12 +131,31 @@ class Statistics:
 
         em.add_field(name='\a', value='\a', inline=False)
         em.add_field(name='**CPU usage**', value='{0:.1f}%'.format(cpu_usage))
-        em.add_field(name='**Memory usage**',
-                     value='{0:.1f}%'.format(mem_v.percent))
+        em.add_field(name='**Memory usage**', value='{0:.1f}%'.format(mem_v.percent))
 
         em.add_field(name='\a', value='\a')
         em.set_footer(text='API version {}'.format(discord.__version__))
         return em
+
+    def get_bot_uptime(self, *, brief=False):
+        # Stolen from owner.py - Courtesy of Danny
+        now = datetime.datetime.utcnow()
+        delta = now - self.bot.uptime
+        hours, remainder = divmod(int(delta.total_seconds()), 3600)
+        minutes, seconds = divmod(remainder, 60)
+        days, hours = divmod(hours, 24)
+
+        if not brief:
+            if days:
+                fmt = '{d} days, {h} hours, {m} minutes, and {s} seconds'
+            else:
+                fmt = '{h} hours, {m} minutes, and {s} seconds'
+        else:
+            fmt = '{h}h {m}m {s}s'
+            if days:
+                fmt = '{d}d ' + fmt
+
+        return fmt.format(d=days, h=hours, m=minutes, s=seconds)
 
     async def reload_stats(self):
         await asyncio.sleep(30)
