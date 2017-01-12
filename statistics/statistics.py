@@ -94,7 +94,7 @@ class Statistics:
             uptime = time.time() - time.mktime(self.bot.uptime.timetuple())
         up = datetime.timedelta(seconds=uptime)
         days = up.days
-        hours = int(up.seconds / 3600)
+        hours = int(up.seconds / 3600) - 1
         minutes = int(up.seconds % 3600 / 60)
         users = str(len(set(self.bot.get_all_members())))
         servers = str(len(self.bot.servers))
