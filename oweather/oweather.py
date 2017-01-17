@@ -28,9 +28,9 @@ class Weather:
                 async with session.get(url, params=payload, headers=headers) as r:
                     parse = await r.json()
                 session.close()
-                celcius = (parse['main']['temp']-273)+1
+                celcius = (parse['main']['temp']-273)+2
                 fahrenheit = (parse['main']['temp']*9/5-459)+2
-                temperature = '{0:.2f} Celsius / {1:.2f} Fahrenheit'.format(celcius, fahrenheit)
+                temperature = '{0:.1f} Celsius /\n {1:.1f} Fahrenheit'.format(celcius, fahrenheit)
                 humidity = str(parse['main']['humidity']) + '%'
                 pressure = str(parse['main']['pressure']) + ' hPa'
                 wind_kmh = str(round(parse['wind']['speed'] * 3.6)) + ' km/h'
