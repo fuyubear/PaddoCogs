@@ -30,7 +30,7 @@ class Weather:
                 session.close()
                 celcius = parse['main']['temp']-273
                 fahrenheit = parse['main']['temp']*9/5-459
-                temperature = '{0:.1f} Celsius /\n {1:.1f} Fahrenheit'.format(celcius, fahrenheit)
+                temperature = '{0:.1f} Celsius\n{1:.1f} Fahrenheit'.format(celcius, fahrenheit)
                 humidity = str(parse['main']['humidity']) + '%'
                 pressure = str(parse['main']['pressure']) + ' hPa'
                 wind_kmh = str(round(parse['wind']['speed'] * 3.6)) + ' km/h'
@@ -43,11 +43,10 @@ class Weather:
                 em.add_field(name='**Conditions**', value=clouds)
                 em.add_field(name='**Temperature**', value=temperature)
                 em.add_field(name='\a', value='\a')
-                em.add_field(name='**Wind**', value='{} /\n{}'.format(wind_kmh, wind_mph))
+                em.add_field(name='**Wind**', value='{}\n{}'.format(wind_kmh, wind_mph))
                 em.add_field(name='**Pressure**', value=pressure)
                 em.add_field(name='**Humidity**', value=humidity)
                 em.set_thumbnail(url='https://openweathermap.org/img/w/{}.png'.format(icon))
-                em.add_field(name='\a', value='\a')
                 em.set_footer(text='Weather data provided by OpenWeatherMap', icon_url='http://openweathermap.org/themes/openweathermap/assets/vendor/owm/img/icons/logo_16x16.png')
                 await self.bot.say(embed=em)
             except KeyError:
