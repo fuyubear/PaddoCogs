@@ -45,7 +45,7 @@ Will remember your username after setting one. [p]lastfm last @username will bec
         try:
             payload = self.payload
             payload['method'] = 'user.getInfo'
-            payload['username'] = username[0]
+            payload['username'] = username
             data = await self._api_request(payload)
         except Exception as e:
             message = 'Something went terribly wrong! [{}]'.format(e)
@@ -53,8 +53,8 @@ Will remember your username after setting one. [p]lastfm last @username will bec
             message = '{}'.format(data['message'])
         else:
             settings = dataIO.load_json(self.settings_file)
-            settings['USERS'][context.message.author.id] = username[0]
-            username = username[0]
+            settings['USERS'][context.message.author.id] = username
+            username = username
             dataIO.save_json(self.settings_file, settings)
             message = 'Username set'
 
