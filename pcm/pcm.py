@@ -95,6 +95,8 @@ class PaddoCogManager:
                 for cog in cogs:
                     if cog['name'] == quote(c):
                         return cog
+        else:
+            await self.bot.say('I can\'t find that cog!')
 
     async def _repo_add(self, context, cog):
         repo_name = cog['repo']['name']
