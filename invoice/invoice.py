@@ -8,10 +8,10 @@ class InVoice:
     """Gives a custom to anyone who enters a voice channel. THIS ROLE MUST EXIST AND THE BOT MUST HAVE THE RIGHTS TO CHANGE ROLES FOR IT TO WORK!"""
     def __init__(self, bot):
         self.bot = bot
-        self.data = dataIO.json_load('data/invoice/settings.json')
+        self.data = dataIO.load_json('data/invoice/settings.json')
 
     async def _save_data(self):
-        dataIO.json_save('data/invoice/settings.json', self.data)
+        dataIO.sava_json('data/invoice/settings.json', self.data)
 
     async def _on_voice_state_update(self, before, after):
         try:
