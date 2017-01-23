@@ -15,7 +15,6 @@
 from discord.ext import commands
 from cogs.utils.dataIO import dataIO
 from cogs.utils import checks
-from cogs.utils.chat_formatting import pagify, box
 from __main__ import send_cmd_help, set_cog
 import os
 from subprocess import run, PIPE
@@ -334,13 +333,6 @@ class PaddoCogManager:
         msg = await self._robust_edit(msg, base_msg + status)
         if not installed_updated_cogs:
             return
-        patchnote_lang = 'Prolog'
-        shorten_by = 8 + len(patchnote_lang)
-        for note in self.patch_notes_handler(installed_updated_cogs):
-            if note is None:
-                continue
-            for page in pagify(note, delims=['\n'], shorten_by=shorten_by):
-                await self.bot.say(box(page, patchnote_lang))
         await self.bot.say("Cogs updated. Reload updated cogs? (yes/no)")
         answer = await self.bot.wait_for_message(timeout=15,
                                                  author=context.message.author)
@@ -416,20 +408,6 @@ class PaddoCogManager:
             return True
         else:
             raise RequirementFail()
-
-    def patch_notes_handler(self, repo_cog_hash_pairs):
-        for repo, cog, oldhash in repo_cog_hash_pairs:
-            pathsplit = self.repos[repo][cog]['file'].split('/')
-            repo_path = os.path.join(*pathsplit[:-2])
-            cogfile = os.path.join(*pathsplit[-2:])
-            cmd = ["git", "-C", repo_path, "log", "--relative-date",
-                   "--reverse", oldhash + '..', cogfile
-                   ]
-            try:
-                log = run(cmd, stdout=PIPE).stdout.decode().strip()
-                yield self.format_patch(repo, cog, log)
-            except:
-                pass
 
     def get_info_data(self, repo_name, cog=None):
         if cog is not None:
@@ -588,13 +566,6 @@ class PaddoCogManager:
         except:
             raise
         return msg
-
-    @staticmethod
-    def format_patch(repo, cog, log):
-        header = "Patch Notes for %s/%s" % (repo, cog)
-        line = "=" * len(header)
-        if log:
-            return '\n'.join((header, line, log))
 
 
 def check_folders():
