@@ -91,6 +91,7 @@ class PaddoCogManager:
                 if not single:
                     em = discord.Embed(title='I have found more than one cog', description=description)
                     await self.bot.say(embed=em)
+
             else:
                 for cog in cogs:
                     if cog['name'] == quote(c):
@@ -189,6 +190,21 @@ class PaddoCogManager:
                 await self._repo_add(context, result)
             await self._cog_add(context, result['repo']['name'], result['name'])
 
+    @_pcm.command(pass_context=True, name='search')
+    async def _search(self, context, cog: str, repo: str=None):
+        """Install a cog. If there's a result with more than 1 cog, add the repo name after the cog name."""
+        result = await self._search_redportal(context, cog, repo)
+        if result:
+            embed = discord.Embed(title='{} by {}'.format(result['name'].capitalize(), result['author']['name']), url='https://cogs.red{}'.format(result['links']['self']), description='\a\n'+(len(result['description']) > 175 and '{}...'.format(result['description'][:175]) or result['description']) or result['short'],
+                                  color=0xfd0000)
+            embed.add_field(name='Type', value=result['repo']['type'].capitalize(), inline=True)
+            embed.add_field(name='Author', value=result['author']['name'], inline=True)
+            embed.add_field(name='Repo', value=result['repo']['name'], inline=True)
+            embed.add_field(name='Command to add cog',
+                            value='{}pcm install {}'.format(context.prefix, result['name']),
+                            inline=False)
+            await self.bot.say(embed=embed)
+
     @_pcm.command(pass_context=True, name='uninstall')
     async def _uninstall(self, context, cog: str):
         """Uninstall a cog"""
@@ -206,6 +222,7 @@ class PaddoCogManager:
         burst_inc = 0.1/(NUM_THREADS)
         touch_n = tasknum
         touch_t = time()
+
         def regulate(touch_t, touch_n):
             dt = time() - touch_t
             if dt + burst_inc*(touch_n) > min_dt:
