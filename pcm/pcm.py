@@ -1,5 +1,6 @@
-# A Red implementation for install cogs, the simple way.
-# Original cogs to be found at
+# A Red implementation for installing cogs, the simple way.
+#
+# Original cogs to be found at:
 # https://github.com/Twentysix26/Red-DiscordBot/blob/develop/cogs/downloader.py
 # https://github.com/orels1/Red-Portal-Cogs/blob/master/redportal/redportal.py
 #
@@ -101,7 +102,7 @@ class PaddoCogManager:
                         return cog_list
             return False
         else:
-            await self.bot.say('I can\'t find that cog!')
+            await self.bot.say('{} doesn\'t seem to be in any repo. Are you sure you got it right?'.format(c))
 
     async def _repo_add(self, context, cog):
         repo_name = cog['repo']['name']
