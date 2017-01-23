@@ -497,10 +497,7 @@ class PaddoCogManager:
             if name not in self.repos:
                 raise UpdateError("Repo does not exist in data, wtf")
             folder = os.path.join(dd, name)
-            # Make sure we don't git reset the Red folder on accident
             if not os.path.exists(os.path.join(folder, '.git')):
-                # if os.path.exists(folder):
-                    # shutil.rmtree(folder)
                 url = self.repos[name].get('url')
                 if not url:
                     raise UpdateError("Need to clone but no URL set")
