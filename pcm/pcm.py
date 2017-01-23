@@ -70,13 +70,12 @@ class PaddoCogManager:
         querystring = 'limit={}&offset={}'.format(limit, offset)
         c = quote(cog)
         url = '{}/{}?{}'.format(base_url, quote(cog), querystring)
-        try:
-            async with aiohttp.get(url, headers={"User-Agent": "Sono-Bot"}) as response:
-                data = await response.json()
-        except:
-            return None
+
+        async with aiohttp.get(url, headers={"User-Agent": "Sono-Bot"}) as response:
+            data = await response.json()
+
         single = True
-        description = ''
+        cog_list = []
         if data is not None and not data['error'] and len(data['results']['list']) > 0:
             cogs = data['results']['list']
             if len(cogs) > 1:
@@ -84,18 +83,23 @@ class PaddoCogManager:
                     if cog['name'] == quote(c):
                         if repo:
                             if repo.lower() == cog['repo']['name'].lower():
-                                    return cog
+                                cog_list.append(cog)
+                                return cog_list
                         else:
-                            description += '{}\t{}\t{}\n'.format(cog['name'], cog['repo']['name'], cog['repo']['type'])
+                            cog_list.append(cog)
                             single = False
+                    else:
+                        cog_list.append(cog)
+                        single = False
                 if not single:
-                    em = discord.Embed(title='I have found more than one cog', description=description)
-                    await self.bot.say(embed=em)
+                    return cog_list
 
             else:
                 for cog in cogs:
                     if cog['name'] == quote(c):
-                        return cog
+                        cog_list.append(cog)
+                        return cog_list
+            return False
         else:
             await self.bot.say('I can\'t find that cog!')
 
@@ -186,24 +190,22 @@ class PaddoCogManager:
         """Install a cog. If there's a result with more than 1 cog, add the repo name after the cog name."""
         result = await self._search_redportal(context, cog, repo)
         if result:
-            if result['repo']['name'] not in self.repos:
-                await self._repo_add(context, result)
-            await self._cog_add(context, result['repo']['name'], result['name'])
-
-    @_pcm.command(pass_context=True, name='search')
-    async def _search(self, context, cog: str, repo: str=None):
-        """Search for a cog. If there's a result with more than 1 cog, add the repo name after the cog name."""
-        result = await self._search_redportal(context, cog, repo)
-        if result:
-            embed = discord.Embed(title='{} by {}'.format(result['name'].capitalize(), result['author']['name']), url='https://cogs.red{}'.format(result['links']['self']), description='\a\n'+(len(result['description']) > 175 and '{}...'.format(result['description'][:175]) or result['description']) or result['short'],
-                                  color=0xfd0000)
-            embed.add_field(name='Type', value=result['repo']['type'].capitalize(), inline=True)
-            embed.add_field(name='Author', value=result['author']['name'], inline=True)
-            embed.add_field(name='Repo', value=result['repo']['name'], inline=True)
-            embed.add_field(name='Command to add cog',
-                            value='{}pcm install {}'.format(context.prefix, result['name']),
-                            inline=False)
-            await self.bot.say(embed=embed)
+            cog = [0]
+            if len(result) > 1:
+                description = '\a\n'
+                for i, cog in enumerate(result, 1):
+                    if i < 10:
+                        description += '`{}`\t  **[{}](https://cogs.red{}) in [{}](https://cogs.red{}) [{}]**\n'.format(str(i), cog['name'], cog['links']['self'], cog['repo']['name'], cog['links']['repo'], cog['repo']['type'])
+                    else:
+                        description += '`{}`\t**{} in {} [{}]**\n'.format(str(i), cog['name'], cog['repo']['name'], cog['repo']['type'])
+                embed = discord.Embed(title='I have found the following cogs', color=discord.Color.red(), description=description)
+                embed.set_footer(text='To install: {}pcm install <cog> <repo>'.format(context.prefix))
+                await self.bot.say(embed=embed)
+            else:
+                cog = result[0]
+                if cog['repo']['name'] not in self.repos:
+                    await self._repo_add(context, cog)
+                await self._cog_add(context, cog['repo']['name'], cog['name'])
 
     @_pcm.command(pass_context=True, name='uninstall')
     async def _uninstall(self, context, cog: str):
@@ -212,6 +214,31 @@ class PaddoCogManager:
             for repo_cog in self.repos[repo]:
                 if repo_cog == cog.lower() and self.repos[repo][cog]['INSTALLED'] is not False:
                     await self._cog_uninstall(context, repo, cog)
+
+    @_pcm.command(pass_context=True, name='search')
+    async def _search(self, context, cog: str, repo: str=None):
+        """Search for a cog. If there's a result with more than 1 cog, add the repo name after the cog name."""
+        result = await self._search_redportal(context, cog, repo)
+        print(result)
+        if result:
+            if len(result) > 1:
+                description = '\a\n'
+                for i, cog in enumerate(result, 1):
+                    if i < 10:
+                        description += '`{}`\t  **[{}](https://cogs.red{}) in [{}](https://cogs.red{}) [{}]**\n'.format(str(i), cog['name'], cog['links']['self'], cog['repo']['name'], cog['links']['repo'], cog['repo']['type'])
+                    else:
+                        description += '`{}`\t**{} in {} [{}]**\n'.format(str(i), cog['name'], cog['repo']['name'], cog['repo']['type'])
+                embed = discord.Embed(title='I have found the following cogs', color=discord.Color.red(), description=description)
+                embed.set_footer(text='To install: {}pcm install <cog> <repo>'.format(context.prefix))
+            else:
+                cog = result[0]
+
+                embed = discord.Embed(title='{} by {}'.format(cog['name'].capitalize(), cog['author']['name']), url='https://cogs.red{}'.format(cog['links']['self']), description='\a\n'+(len(cog['description']) > 175 and '{}...'.format(cog['description'][:175]) or cog['description']) or cog['short'], color=discord.Color.red())
+                embed.add_field(name='Type', value=cog['repo']['type'].capitalize(), inline=True)
+                embed.add_field(name='Author', value=cog['author']['name'], inline=True)
+                embed.add_field(name='Repo', value=cog['repo']['name'], inline=True)
+                embed.add_field(name='Command to add cog', value='{}pcm install {}'.format(context.prefix, cog['name']), inline=False)
+            await self.bot.say(embed=embed)
 
     @_pcm.command(pass_context=True, name='update')
     async def _update(self, context):
