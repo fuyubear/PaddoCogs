@@ -192,7 +192,7 @@ class PaddoCogManager:
 
     @_pcm.command(pass_context=True, name='search')
     async def _search(self, context, cog: str, repo: str=None):
-        """Install a cog. If there's a result with more than 1 cog, add the repo name after the cog name."""
+        """Search for a cog. If there's a result with more than 1 cog, add the repo name after the cog name."""
         result = await self._search_redportal(context, cog, repo)
         if result:
             embed = discord.Embed(title='{} by {}'.format(result['name'].capitalize(), result['author']['name']), url='https://cogs.red{}'.format(result['links']['self']), description='\a\n'+(len(result['description']) > 175 and '{}...'.format(result['description'][:175]) or result['description']) or result['short'],
