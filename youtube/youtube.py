@@ -26,7 +26,6 @@ class YouTube:
                 result = await r.text()
             session.close()
             yt_find = re.findall(r'href=\"\/watch\?v=(.{11})', result)
-            print(result)
             url = 'https://www.youtube.com/watch?v={}'.format(yt_find[0])
             await self.bot.say(url)
         except Exception as e:
