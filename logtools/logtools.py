@@ -5,7 +5,7 @@ from cogs.utils.dataIO import dataIO
 from __main__ import send_cmd_help
 from time import time
 import os
-
+import datetime
 
 class LogTools:
     def __init__(self, bot):
@@ -84,22 +84,32 @@ class LogTools:
 
     @_logs.command(pass_context=True, no_pm=True, name='roleplay', aliases=['rp'])
     @checks.mod_or_permissions(manage_channels=True)
-    async def _roleplay(self, context, channel: discord.Channel, number: int):
+    async def _roleplay(self, context, channel: discord.Channel, number: int, *timestamp: int):
         """[channel] [number]"""
         data = dataIO.load_json(self.ignore_file)
         current_server = context.message.server.id
         current_channel = channel.id
+        if timestamp:
+            t = datetime.datetime.fromtimestamp(timestamp[0])
         if current_server not in data:
             data[current_server] = []
         if current_channel not in data[current_server]:
             log = []
             try:
-                async for message in self.bot.logs_from(channel, limit=number):
-                    author = message.author
-                    content = message.clean_content
-                    timestamp = str(message.timestamp)[:-7]
-                    log_msg = '[{}] {}: {}'.format(timestamp, author.name, content)
-                    log.append(log_msg)
+                if not timestamp:
+                    async for message in self.bot.logs_from(channel, limit=number):
+                        author = message.author
+                        content = message.clean_content
+                        timestamp = str(message.timestamp)[:-7]
+                        log_msg = '[{}] {}: {}'.format(timestamp, author.name, content)
+                        log.append(log_msg)
+                else:
+                    async for message in self.bot.logs_from(channel, limit=number, after=t):
+                        author = message.author
+                        content = message.clean_content
+                        timestamp = str(message.timestamp)[:-7]
+                        log_msg = '[{}] {}: {}'.format(timestamp, author.name, content)
+                        log.append(log_msg)
 
                 try:
                     t = self.file.format(str(time()))
