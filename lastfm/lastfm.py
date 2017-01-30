@@ -148,8 +148,11 @@ Will remember your username after setting one. [p]lastfm last @username will bec
                         em = discord.Embed(url=url)
                         avatar = author.avatar_url if author.avatar else author.default_avatar_url
                         em.set_author(name='{} - {}'.format(artist, song), icon_url=avatar)
-                        em.set_image(url=image)
+                        if not self.bot.get_cog('YouTube'):
+                            em.set_image(url=image)
                         await self.bot.say(embed=em)
+                        if self.bot.get_cog('YouTube'):
+                            await context.invoke(self.bot.get_cog('YouTube')._youtube, query='{} - {}'.format(artist, song))
                 except KeyError:
                     await self.bot.say('{} is not playing any song right now'.format(user))
         else:
