@@ -64,7 +64,7 @@ class PaddoCogManager:
 
     async def _search_redportal(self, context, cog, repo):
         data = None
-        base_url = 'https://cogs.red/api/v1/cogs/search'
+        base_url = 'https://cogs.red/api/v1/search/cogs'
         limit = 100
         offset = 0
         querystring = 'limit={}&offset={}'.format(limit, offset)
