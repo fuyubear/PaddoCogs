@@ -11,7 +11,7 @@ class InVoice:
         self.data = dataIO.load_json('data/invoice/settings.json')
 
     async def _save_data(self):
-        dataIO.sava_json('data/invoice/settings.json', self.data)
+        dataIO.save_json('data/invoice/settings.json', self.data)
 
     async def _on_voice_state_update(self, before, after):
         try:
