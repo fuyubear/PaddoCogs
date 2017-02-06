@@ -3,5 +3,6 @@
     "INSTALL_MSG" : "You might even get a beverage from an unknown person. :wink:",
     "NAME" : "BarPM",
     "SHORT" : "Subscribe to beverages",
-    "DESCRIPTION" : "Serves drinks across all servers among mentioning a beverage listed. So you might even get a beverage from an unknown person."
+    "DESCRIPTION" : "Serves drinks across all servers among mentioning a beverage listed. So you might even get a beverage from an unknown person.",
+    "TAGS": ["Bar", "drinking", "members", "mini-game"]
 }

@@ -2,5 +2,6 @@
     "AUTHOR" : "Paddolicious#8880",
     "NAME" : "Wikipedia",
     "SHORT" : "Search Wikipedia",
-    "DESCRIPTION" : "Search Wikipedia"
+    "DESCRIPTION" : "Search Wikipedia",
+    "TAGS": ["Wikipedia", "text", "search"]
 }

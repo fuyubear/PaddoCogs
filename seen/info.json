@@ -2,5 +2,6 @@
     "AUTHOR" : "Paddolicious#8880",
     "NAME" : "Seen",
     "SHORT" : "Check when the user was last active on a server.",
-    "DESCRIPTION" : "Check when the user was last active on a server."
+    "DESCRIPTION" : "Check when the user was last active on a server.",
+    "TAGS": ["Seen", "member", "tools"]
 }
