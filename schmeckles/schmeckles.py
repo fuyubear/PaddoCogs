@@ -21,7 +21,7 @@ class Schmeckles:
         return schmeckle * 139.25   # latest USDRUB value
 
     async def searchForSchmeckles(self, content):
-        if any([x in content.lower() for x in ['?', 'how much', 'what is', 'how many', 'euro', 'usd', 'dollars', 'dollar', 'euros', 'shm to eur', 'shm to usd']]):
+        if any([x in content.lower() for x in ['?', 'how much', 'what is', 'how many', 'euro', 'usd', 'dollars', 'dollar', 'euros']]):
             return self.p.search(content)
         return None
 
