@@ -15,8 +15,14 @@ class Schmeckles:
     async def schmeckle2eur(self, schmeckle):
         return schmeckle * 139.25   # latest USDEUR value
 
+    async def schmeckle2yen(self, schmeckle):
+        return schmeckle * 139.25   # latest USDYEN value
+
+    async def schmeckle2rub(self, schmeckle):
+        return schmeckle * 139.25   # latest USDRUB value
+
     async def searchForSchmeckles(self, content):
-        if any([x in content.lower() for x in ['?', 'how much', 'what is', 'euro', 'usd', 'dollars', 'dollar', 'euros']]):
+        if any([x in content.lower() for x in ['?', 'how much', 'what is', 'how many', 'euro', 'usd', 'dollars', 'dollar', 'euros']]):
             return self.p.search(content)
         return None
 
@@ -27,11 +33,11 @@ class Schmeckles:
             euro = any([x in match[-1].lower() for x in ['eur', 'euro', 'euros']])
             dollar = any([x in match[-1].lower() for x in ['usd', 'dollar', 'dollars']])
             if euro and not dollar:
-                value = await self.schmeckle2eur(float(match[1].split()[0])), '€', match[1].split()[0]
+                value = await self.schmeckle2eur(float(match[1].split()[0])), 'EUR', match[1].split()[0]
             elif dollar and not euro:
-                value = await self.schmeckle2usd(float(match[1].split()[0])), '$', match[1].split()[0]
+                value = await self.schmeckle2usd(float(match[1].split()[0])), 'USD', match[1].split()[0]
             elif not dollar and not euro:
-                value = await self.schmeckle2usd(float(match[1].split()[0])), '$', match[1].split()[0]
+                value = await self.schmeckle2usd(float(match[1].split()[0])), 'USD', match[1].split()[0]
             return value
         return None
 
@@ -42,7 +48,7 @@ class Schmeckles:
         if author.id != self.bot.user.id:
             schmeckles = await self.getSchmeckles(content)
             if schmeckles:
-                await self.bot.send_message(channel, '{} schmeckles is about {}{}'.format(schmeckles[2], schmeckles[1], str(schmeckles[0]).replace(".", ",")))
+                await self.bot.send_message(channel, '{0} SHM is about {1} {2:.2f}'.format(schmeckles[2], str(schmeckles[0]).replace(".", ","), schmeckles[1]))
 
 
 def setup(bot):
