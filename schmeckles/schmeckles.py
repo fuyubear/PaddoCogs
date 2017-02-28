@@ -48,7 +48,7 @@ class Schmeckles:
         if author.id != self.bot.user.id:
             schmeckles = await self.getSchmeckles(content)
             if schmeckles:
-                await self.bot.send_message(channel, '{0} SHM is about {1} {2:.2f}'.format(schmeckles[2], str(schmeckles[0]).replace(".", ","), schmeckles[1]))
+                await self.bot.send_message(channel, '{0} SHM is about {1:.2f} {2}'.format(schmeckles[2], schmeckles[0], schmeckles[1]))
 
 
 def setup(bot):
