@@ -1,5 +1,4 @@
 import re
-import discord
 
 
 class Schmeckles:
@@ -22,7 +21,7 @@ class Schmeckles:
         return schmeckle * 139.25   # latest USDRUB value
 
     async def searchForSchmeckles(self, content):
-        if any([x in content.lower() for x in ['?', 'how much', 'what is', 'how many', 'euro', 'usd', 'dollars', 'dollar', 'euros']]):
+        if any([x in content.lower() for x in ['?', 'how much', 'what is', 'how many', 'euro', 'usd', 'dollars', 'dollar', 'euros', 'shm to eur', 'shm to usd']]):
             return self.p.search(content)
         return None
 
@@ -48,7 +47,7 @@ class Schmeckles:
         if author.id != self.bot.user.id:
             schmeckles = await self.getSchmeckles(content)
             if schmeckles:
-                await self.bot.send_message(channel, '{0} SHM is about {1:.2f} {2}'.format(schmeckles[2], schmeckles[0], schmeckles[1]))
+                await self.bot.send_message(channel, '{0[2]} SHM is about {0[0]:.2f} {0[1]}'.format(schmeckles))
 
 
 def setup(bot):
