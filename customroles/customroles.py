@@ -9,15 +9,15 @@ class CustomRoles:
     def __init__(self, bot):
         self.bot = bot
 
-    @commands.group(pass_context=True, no_pm=True)
-    async def role(self, context):
+    @commands.group(pass_context=True, no_pm=True, name='role')
+    async def _role(self, context):
         """Mods can add roles, users can apply or relieve roles. Roles created with this cog have no permissions, it only functions for fun."""
         if context.invoked_subcommand is None:
             await send_cmd_help(context)
 
-    @role.command(pass_context=True, no_pm=True, aliases=['new'])
+    @_role.command(pass_context=True, no_pm=True, name='add', aliases=['new'])
     @checks.mod_or_permissions(manage_roles=True)
-    async def add(self, context, color, *role_name):
+    async def _add(self, context, color, *role_name):
         """Add a role
         Example: role add ff0000 Red Role"""
         server = context.message.server
@@ -34,9 +34,9 @@ class CustomRoles:
             message = '`Not a valid heximal color`'
         await self.bot.say(message)
 
-    @role.command(pass_context=True, no_pm=True, aliases=['delete'])
+    @_role.command(pass_context=True, no_pm=True, name='remove', aliases=['delete'])
     @checks.mod_or_permissions(manage_roles=True)
-    async def remove(self, context, *role_name):
+    async def _remove(self, context, *role_name):
         """Remove role"""
         server = context.message.server
         name = ' '.join(role_name)
@@ -59,8 +59,8 @@ class CustomRoles:
             message = 'There is no such role on this server'
         await self.bot.say(message)
 
-    @role.command(pass_context=True, no_pm=True)
-    async def apply(self, context, *role_name):
+    @_role.command(pass_context=True, no_pm=True, name='apply')
+    async def _apply(self, context, *role_name):
         """Apply a role"""
         server = context.message.server
         author = context.message.author
@@ -84,8 +84,8 @@ class CustomRoles:
             message = 'There is no such role on this server'
         await self.bot.say(message)
 
-    @role.command(pass_context=True, no_pm=True)
-    async def relieve(self, context, *role_name):
+    @_role.command(pass_context=True, no_pm=True, name='relieve')
+    async def _relieve(self, context, role_name):
         """Relieve a role"""
         server = context.message.server
         author = context.message.author
@@ -106,8 +106,8 @@ class CustomRoles:
             message = 'There is no such role on this server'
         await self.bot.say(message)
 
-    @role.command(pass_context=True, no_pm=True)
-    async def list(self, context):
+    @_role.command(pass_context=True, no_pm=True, name='list')
+    async def _list(self, context):
         """List all available roles"""
         server = context.message.server
         message = '```\nAvailable roles:\n'
