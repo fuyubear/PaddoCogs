@@ -23,7 +23,7 @@ class Lastfm:
     async def _api_request(self, payload):
         url = 'http://ws.audioscrobbler.com/2.0/?'
         headers = {'user-agent': 'Red-cog/1.0'}
-        conn = aiohttp.TCPConnector(verify_ssl=False)
+        conn = aiohttp.TCPConnector()
         session = aiohttp.ClientSession(connector=conn)
         async with session.get(url, params=payload, headers=headers) as r:
             data = await r.json()
