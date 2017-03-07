@@ -85,7 +85,7 @@ class CustomRoles:
         await self.bot.say(message)
 
     @_role.command(pass_context=True, no_pm=True, name='relieve')
-    async def _relieve(self, context, role_name):
+    async def _relieve(self, context, *role_name):
         """Relieve a role"""
         server = context.message.server
         author = context.message.author
