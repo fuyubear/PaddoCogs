@@ -21,8 +21,9 @@ class Kill:
         server = context.message.server
         author = context.message.author
         x = None
-        x = list(self.kills[server.id].keys())
-        if x and server.id in self.kills:
+        if server.id in self.kills:
+            x = list(self.kills[server.id].keys())
+        if x:
             message = self.kills[server.id][random.choice(x)]['text'].format(victim=victim.display_name, killer=author.display_name)
         else:
             message = 'I don\'t know how to kill yet. Use `{}addkill` to add kills.'.format(context.prefix)
