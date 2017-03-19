@@ -3,14 +3,12 @@ import discord
 from discord.ext import commands
 from cogs.utils.dataIO import dataIO
 
-JSON = 'data/away/away.json'
-
 
 class Away:
     """Le away cog"""
     def __init__(self, bot):
         self.bot = bot
-        self.data = dataIO.load_json(JSON)
+        self.data = dataIO.load_json('data/away/away.json')
 
     async def listener(self, message):
         tmp = {}
@@ -19,14 +17,21 @@ class Away:
         if message.author.id != self.bot.user.id:
             for author in tmp:
                 if author.id in self.data:
-                    avatar = author.avatar_url if author.avatar else author.default_avatar_url
-                    if self.data[author.id]['MESSAGE']:
-                        em = discord.Embed(description=self.data[author.id]['MESSAGE'], color=discord.Color.blue())
-                        em.set_author(name='{} is currently away'.format(author.display_name), icon_url=avatar)
-                    else:
-                        em = discord.Embed(color=discord.Color.blue())
-                        em.set_author(name='{} is currently away'.format(author.display_name), icon_url=avatar)
-                    await self.bot.send_message(message.channel, embed=em)
+                    try:
+                        avatar = author.avatar_url if author.avatar else author.default_avatar_url
+                        if self.data[author.id]['MESSAGE']:
+                            em = discord.Embed(description=self.data[author.id]['MESSAGE'], color=discord.Color.blue())
+                            em.set_author(name='{} is currently away'.format(author.display_name), icon_url=avatar)
+                        else:
+                            em = discord.Embed(color=discord.Color.blue())
+                            em.set_author(name='{} is currently away'.format(author.display_name), icon_url=avatar)
+                        await self.bot.send_message(message.channel, embed=em)
+                    except:
+                        if self.data[author.id]['MESSAGE']:
+                            msg = '{} is currently away and has set the following message: `{}`'.format(author.display_name, self.data[author.id]['MESSAGE'])
+                        else:
+                            msg = '{} is currently away'.format(author.display_name)
+                        await self.bot.send_message(message.channel, msg)
 
     @commands.command(pass_context=True, name="away")
     async def _away(self, context, *message: str):
@@ -42,7 +47,7 @@ class Away:
             else:
                 self.data[context.message.author.id]['MESSAGE'] = True
             msg = 'You\'re now set as away.'
-        dataIO.save_json(JSON, self.data)
+        dataIO.save_json('data/away/away.json', self.data)
         await self.bot.say(msg)
 
 
