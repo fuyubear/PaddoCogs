@@ -21,7 +21,7 @@ class Lastfm:
         self.payload['format'] = 'json'
 
     async def _api_request(self, payload):
-        url = 'http://ws.audioscrobbler.com/2.0/?'
+        url = 'http://ws.audioscrobbler.com/2.0/'
         headers = {'user-agent': 'Red-cog/1.0'}
         conn = aiohttp.TCPConnector()
         session = aiohttp.ClientSession(connector=conn)
@@ -57,7 +57,6 @@ Will remember your username after setting one. [p]lastfm last @username will bec
             username = username
             dataIO.save_json(self.settings_file, settings)
             message = 'Username set'
-
         await self.bot.say(message)
 
     @_lastfm.command(pass_context=True, no_pm=True, name='info')
@@ -363,7 +362,10 @@ Will remember your username after setting one. [p]lastfm last @username will bec
             settings['LASTFM_API_KEY'] = key[0]
             self.api_key = key[0]
             dataIO.save_json(self.settings_file, settings)
-            await self.bot.say('```Done```')
+            await self.bot.say('**Done**')
+       else:
+            await self.bot.say('**I need more than that!**')
+         
 
 
 def check_folder():
