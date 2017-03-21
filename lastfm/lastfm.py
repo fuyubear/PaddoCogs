@@ -89,7 +89,6 @@ Will remember your username after setting one. [p]lastfm last @username will bec
                 playcount = data['user']['playcount']
                 registered = datetime.datetime.fromtimestamp(data['user']['registered']['#text']).strftime('%Y-%m-%d')
                 image = data['user']['image'][1]['#text']
-                print(data)
                 author = context.message.author
                 em = discord.Embed(url='http://www.last.fm/user/{}'.format(user), description='\a\n')
                 avatar = author.avatar_url if author.avatar else author.default_avatar_url
