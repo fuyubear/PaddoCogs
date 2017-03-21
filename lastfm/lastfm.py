@@ -362,9 +362,8 @@ Will remember your username after setting one. [p]lastfm last @username will bec
             self.api_key = key[0]
             dataIO.save_json(self.settings_file, settings)
             await self.bot.say('**Done**')
-       else:
+        else:
             await self.bot.say('**I need more than that!**')
-         
 
 
 def check_folder():
