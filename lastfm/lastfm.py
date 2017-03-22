@@ -30,7 +30,7 @@ class Lastfm:
         session.close()
         return data
 
-    @commands.group(pass_context=True, no_pm=True, name='lastfm', aliases=['lf'])
+    @commands.group(pass_context=True, name='lastfm', aliases=['lf'])
     async def _lastfm(self, context):
         """Get Last.fm statistics of a user.
 
@@ -38,7 +38,7 @@ Will remember your username after setting one. [p]lastfm last @username will bec
         if context.invoked_subcommand is None:
             await send_cmd_help(context)
 
-    @_lastfm.command(pass_context=True, no_pm=True, name='set')
+    @_lastfm.command(pass_context=True, name='set')
     async def _set(self, context, username: str):
         """Set a username"""
 
@@ -59,7 +59,7 @@ Will remember your username after setting one. [p]lastfm last @username will bec
             message = 'Username set'
         await self.bot.say(message)
 
-    @_lastfm.command(pass_context=True, no_pm=True, name='info')
+    @_lastfm.command(pass_context=True, name='info')
     async def _info(self, context, *username: str):
         """Retrieve general information"""
         if self.api_key != '':
@@ -107,7 +107,7 @@ Will remember your username after setting one. [p]lastfm last @username will bec
             message = 'No API key set for Last.fm. Get one at http://www.last.fm/api'
             await self.bot.say(message)
 
-    @_lastfm.command(pass_context=True, no_pm=True, name='now')
+    @_lastfm.command(pass_context=True, name='now')
     async def _now(self, context, *username: str):
         """Shows the current played song"""
         if self.api_key != '':
@@ -157,7 +157,7 @@ Will remember your username after setting one. [p]lastfm last @username will bec
             message = 'No API key set for Last.fm. Get one at http://www.last.fm/api'
             await self.bot.say(message)
 
-    @_lastfm.command(pass_context=True, no_pm=True, name='recent', aliases=['lp', 'last'])
+    @_lastfm.command(pass_context=True, name='recent', aliases=['lp', 'last'])
     async def _recent(self, context, *username: str):
         """Shows recent tracks"""
         if self.api_key != '':
@@ -205,7 +205,7 @@ Will remember your username after setting one. [p]lastfm last @username will bec
             message = 'No API key set for Last.fm. Get one at http://www.last.fm/api'
             await self.bot.say(message)
 
-    @_lastfm.command(pass_context=True, no_pm=True, name='toptracks', aliases=['tracks', 'ttr'])
+    @_lastfm.command(pass_context=True, name='toptracks', aliases=['tracks', 'ttr'])
     async def _toptracks(self, context, *username: str):
         """Shows most played tracks"""
         if self.api_key != '':
@@ -254,7 +254,7 @@ Will remember your username after setting one. [p]lastfm last @username will bec
             message = 'No API key set for Last.fm. Get one at http://www.last.fm/api'
             await self.bot.say(message)
 
-    @_lastfm.command(pass_context=True, no_pm=True, name='topartists', aliases=['artists', 'tar'])
+    @_lastfm.command(pass_context=True, name='topartists', aliases=['artists', 'tar'])
     async def _topartists(self, context, *username: str):
         """Shows most played artists"""
         if self.api_key != '':
@@ -302,7 +302,7 @@ Will remember your username after setting one. [p]lastfm last @username will bec
             message = 'No API key set for Last.fm. Get one at http://www.last.fm/api'
             await self.bot.say(message)
 
-    @_lastfm.command(pass_context=True, no_pm=True, name='topalbums', aliases=['albums', 'tab'])
+    @_lastfm.command(pass_context=True, name='topalbums', aliases=['albums', 'tab'])
     async def _topalbums(self, context, *username: str):
         """Shows most played albums"""
         if self.api_key != '':
