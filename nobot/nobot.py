@@ -34,8 +34,11 @@ class NoBots:
         server = member.server
         if server.id in self.settings and member.bot:
             if self.settings[server.id]:
-                await self.bot.kick(member)
-                await self.bot.send_message(member, 'The owner of **{}** has bot protection enabled. You are not allowed to enter.'.format(server.name))
+                try:
+                    await self.bot.kick(member)
+                    await self.bot.send_message(member, 'The owner of **{}** has bot protection enabled. You are not allowed to enter.'.format(server.name))
+                except:
+                    pass
 
 
 def check_folder():
