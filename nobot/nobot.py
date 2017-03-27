@@ -17,16 +17,16 @@ class NoBots:
     @commands.command(pass_context=True, name='nobots')
     @checks.mod_or_permissions(administrator=True)
     async def _nobots(self, context):
-        """Nobots toggle"""
+        """NoBots toggle"""
         server = context.message.server
         if server.id not in self.settings:
             self.settings[server.id] = False
         if self.settings[server.id]:
             self.settings[server.id] = False
-            message = ':gear: Disabled bot protection.'
+            message = ':gear: Bot protection disabled.'
         else:
             self.settings[server.id] = True
-            message = ':gear: Enabled bot protection.'
+            message = ':gear: Bot protection enabled.'
         await self._save_settings()
         await self.bot.say(message)
 
@@ -35,7 +35,7 @@ class NoBots:
         if server.id in self.settings and member.bot:
             if self.settings[server.id]:
                 await self.bot.kick(member)
-                await self.bot.send_message(member, 'The owner of {} has bot protection enabled. You are no allowed to enter.'.format(server.name))
+                await self.bot.send_message(member, 'The owner of **{}** has bot protection enabled. You are not allowed to enter.'.format(server.name))
 
 
 def check_folder():
