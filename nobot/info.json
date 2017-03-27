@@ -1,0 +1,7 @@
+{
+    "AUTHOR" : "Paddo#8880",
+    "NAME" : "NoBot",
+    "SHORT" : "All bots will be kicked when they join. Toggable per server.",
+    "DESCRIPTION" : "All bots will be kicked when they join. Toggable per server.",
+    "TAGS": ["kick", "bots", "nobot"]
+}
