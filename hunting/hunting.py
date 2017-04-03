@@ -113,7 +113,7 @@ class Hunting:
             for i, hunter in enumerate(scores, 1):
                 if i > 20:
                     break
-                message += '{:<4}{:<8}{} ({})\n'.format(i, p[hunter]['total'], p[hunter]['author_name'], ', '.join([str(p[hunter][x]) + ' ' + x.capitalize() + 's' for x in p[hunter] if x != 'total' or x != 'author_name']))
+                message += '{:<4}{:<8}{} ({})\n'.format(i, p[hunter]['total'], p[hunter]['author_name'], ', '.join([str(p[hunter]['score'][x]) + ' ' + x.capitalize() + 's' for x in p[hunter]['score']]))
             message += '```'
         else:
             message = '**Please shoot something before you can brag about it.**'
@@ -124,14 +124,15 @@ class Hunting:
             self.scores[server.id] = {}
         if author.id not in self.scores[server.id]:
             self.scores[server.id][author.id] = {}
+            self.scores[server.id][author.id]['score'] = {}
             self.scores[server.id][author.id]['total'] = 0
             self.scores[server.id][author.id]['author_name'] = ''
             for a in list(self.animals.keys()):
-                self.scores[server.id][author.id][a] = 0
-        if avian not in self.scores[server.id][author.id]:
-            self.scores[server.id][author.id][avian] = 0
+                self.scores[server.id][author.id]['score'][a] = 0
+        if avian not in self.scores[server.id][author.id]['score']:
+            self.scores[server.id][author.id]['score'][avian] = 0
         self.scores[server.id][author.id]['author_name'] = author.display_name
-        self.scores[server.id][author.id][avian] += 1
+        self.scores[server.id][author.id]['score'][avian] += 1
         self.scores[server.id][author.id]['total'] += 1
         await self._save_scores()
 
