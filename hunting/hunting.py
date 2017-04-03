@@ -114,7 +114,10 @@ class Hunting:
                 if i > 20:
                     break
                 author = server.get_member(hunter)
-                message += '{:<4}{:<8}{} ({})\n'.format(i, p[hunter]['total'], author.display_name, ', '.join([str(p[hunter][x]) + ' ' + x.capitalize() + 's' for x in p[hunter] if x != 'total']))
+                if author:
+                    message += '{:<4}{:<8}{} ({})\n'.format(i, p[hunter]['total'], author.display_name, ', '.join([str(p[hunter][x]) + ' ' + x.capitalize() + 's' for x in p[hunter] if x != 'total']))
+                else:
+                    message += '{:<4}{:<8}{} ({})\n'.format(i, p[hunter]['total'], 'Can\'t find username', ', '.join([str(p[hunter][x]) + ' ' + x.capitalize() + 's' for x in p[hunter] if x != 'total']))
             message += '```'
         else:
             message = '**Please shoot something before you can brag about it.**'
