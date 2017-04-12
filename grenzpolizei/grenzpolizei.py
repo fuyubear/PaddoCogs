@@ -449,35 +449,35 @@ class Grenzpolizei:
         if await self._validate_event(server):
             if not before.voice.is_afk and after.voice.is_afk:
                 embed = discord.Embed(color=self.blue)
-                embed.set_author(name='{0.display_name} is idle and has been sent to #{0.voice_channel}'.format(after), icon_url=server.icon_url)
+                embed.set_author(name='{0.display_name} is idle and has been sent to #{0.voice_channel}'.format(after), icon_url=after.avatar_url)
                 await self._send_message_to_channel(server, embed=embed)
             elif before.voice.is_afk and not after.voice.is_afk:
                 embed = discord.Embed(color=self.blue)
-                embed.set_author(name='{0.display_name} is active again in #{0.voice_channel}'.format(after), icon_url=server.icon_url)
+                embed.set_author(name='{0.display_name} is active again in #{0.voice_channel}'.format(after), icon_url=after.avatar_url)
                 await self._send_message_to_channel(server, embed=embed)
             if not before.voice.self_mute and after.voice.self_mute:
                 embed = discord.Embed(color=self.blue)
-                embed.set_author(name='{0.display_name} muted themselves in #{0.voice_channel}'.format(after), icon_url=server.icon_url)
+                embed.set_author(name='{0.display_name} muted themselves in #{0.voice_channel}'.format(after), icon_url=after.avatar_url)
                 await self._send_message_to_channel(server, embed=embed)
             elif before.voice.self_mute and not after.voice.self_mute:
                 embed = discord.Embed(color=self.blue)
-                embed.set_author(name='{0.display_name} unmuted themselves in #{0.voice_channel}'.format(after), icon_url=server.icon_url)
+                embed.set_author(name='{0.display_name} unmuted themselves in #{0.voice_channel}'.format(after), icon_url=after.avatar_url)
                 await self._send_message_to_channel(server, embed=embed)
             if not before.voice.self_deaf and after.voice.self_deaf:
                 embed = discord.Embed(color=self.blue)
-                embed.set_author(name='{0.display_name} deafened themselves in #{0.voice_channel}'.format(after), icon_url=server.icon_url)
+                embed.set_author(name='{0.display_name} deafened themselves in #{0.voice_channel}'.format(after), icon_url=after.avatar_url)
                 await self._send_message_to_channel(server, embed=embed)
             elif before.voice.self_deaf and not after.voice.self_deaf:
                 embed = discord.Embed(color=self.blue)
-                embed.set_author(name='{0.display_name} undeafened themselves in #{0.voice_channel}'.format(after), icon_url=server.icon_url)
+                embed.set_author(name='{0.display_name} undeafened themselves in #{0.voice_channel}'.format(after), icon_url=after.avatar_url)
                 await self._send_message_to_channel(server, embed=embed)
             if not before.voice.voice_channel and after.voice.voice_channel:
                 embed = discord.Embed(color=self.blue)
-                embed.set_author(name='{0.display_name} joined voice channel #{0.voice_channel}'.format(after), icon_url=server.icon_url)
+                embed.set_author(name='{0.display_name} joined voice channel #{0.voice_channel}'.format(after), icon_url=after.avatar_url)
                 await self._send_message_to_channel(server, embed=embed)
             elif before.voice.voice_channel and not after.voice.voice_channel:
                 embed = discord.Embed(color=self.blue)
-                embed.set_author(name='{1.display_name} left voice channel #{0.voice_channel}'.format(before, after), icon_url=server.icon_url)
+                embed.set_author(name='{1.display_name} left voice channel #{0.voice_channel}'.format(before, after), icon_url=after.avatar_url)
                 await self._send_message_to_channel(server, embed=embed)
 
 
