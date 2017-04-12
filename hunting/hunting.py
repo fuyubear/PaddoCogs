@@ -138,7 +138,7 @@ class Hunting:
 
     async def _wait_for_bang(self, server, channel):
         def check(message):
-            return message.content.lower().startswith('bang') or message.content.lower().startswith('b')
+            return message.content.lower().split()[0] == 'bang' or message.content.lower().split()[0] == 'b'
 
         animal = random.choice(list(self.animals.keys()))
         await self.bot.send_message(channel, self.animals[animal])
