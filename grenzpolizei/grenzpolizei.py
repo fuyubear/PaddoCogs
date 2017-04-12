@@ -336,7 +336,7 @@ class Grenzpolizei:
         server = after.server
         member = after.author
         timestamp = datetime.utcnow()
-        if await self._validate_event(server) and member.id != self.bot.user.id:
+        if await self._validate_event(server) and member.id != self.bot.user.id and before.clean_content != after.clean_content:
             embed = discord.Embed(color=self.orange)
             avatar = member.avatar_url if member.avatar else member.default_avatar_url
             embed.set_author(name='A message by {0.display_name}#{0.discriminator} has been edited'.format(member), icon_url=avatar)
