@@ -29,8 +29,8 @@ class Seen:
         '''seen <@username>'''
         server = context.message.server
         author = username
-        print([[True if author.id in self.seen[server.id] else False] if server.id in self.seen else False])
-        if [[True if author.id in self.seen[server.id] else False] if server.id in self.seen else False]:
+        print(True if author.id in self.seen[server.id] else False if server.id in self.seen else False)
+        if True if author.id in self.seen[server.id] else False if server.id in self.seen else False:
             data = self.seen[server.id][author.id]
             ts = data['TIMESTAMP']
             channel = await self._get_channel(data['CHANNEL'])
