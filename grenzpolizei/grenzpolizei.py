@@ -325,7 +325,7 @@ class Grenzpolizei:
         if await self._validate_event(server) and member.id != self.bot.user.id:
             embed = discord.Embed(color=self.red)
             avatar = member.avatar_url if member.avatar else member.default_avatar_url
-            embed.set_author(name='A message by {0.display_name}#{0.discriminator} has been removed'.format(member), icon_url=avatar)
+            embed.set_author(name='A message by {0.display_name}#{0.discriminator} ({0.id}) has been removed'.format(member), icon_url=avatar)
             embed.add_field(name='**Channel**', value=message.channel.name)
             embed.add_field(name='**Message timestamp**', value=message.timestamp.strftime('%Y-%m-%d %H:%M:%S'))
             embed.add_field(name='**Removal timestamp**', value=timestamp.strftime('%Y-%m-%d %H:%M:%S'))
@@ -337,9 +337,9 @@ class Grenzpolizei:
         member = after.author
         timestamp = datetime.utcnow()
         if await self._validate_event(server) and member.id != self.bot.user.id and before.clean_content != after.clean_content:
-            embed = discord.Embed(color=self.orange)
+            embed = discord.Embed(color=self.blue)
             avatar = member.avatar_url if member.avatar else member.default_avatar_url
-            embed.set_author(name='A message by {0.display_name}#{0.discriminator} has been edited'.format(member), icon_url=avatar)
+            embed.set_author(name='A message by {0.display_name}#{0.discriminator} ({0.id}) has been edited'.format(member), icon_url=avatar)
             embed.add_field(name='**Channel**', value=before.channel.name)
             embed.add_field(name='**Message timestamp**', value=before.timestamp.strftime('%Y-%m-%d %H:%M:%S'))
             embed.add_field(name='**Edit timestamp**', value=timestamp.strftime('%Y-%m-%d %H:%M:%S'))
@@ -365,15 +365,15 @@ class Grenzpolizei:
         server = after.server
         if await self._validate_event(server):
             if before.name != after.name:
-                embed = discord.Embed(color=self.orange)
+                embed = discord.Embed(color=self.blue)
                 embed.set_author(name='#{0.name} renamed to #{1.name}'.format(before, after), icon_url=server.icon_url)
                 await self._send_message_to_channel(server, embed=embed)
             if before.topic != after.topic:
-                embed = discord.Embed(color=self.orange)
+                embed = discord.Embed(color=self.blue)
                 embed.set_author(name='#{0.name} topic changed from \'{0.topic}\' to \'{1.topic}\''.format(before, after), icon_url=server.icon_url)
                 await self._send_message_to_channel(server, embed=embed)
             if before.position != after.position:
-                embed = discord.Embed(color=self.green)
+                embed = discord.Embed(color=self.blue)
                 embed.set_author(name='#{0.name} moved from {0.position} to {1.position}'.format(before, after), icon_url=server.icon_url)
                 await self._send_message_to_channel(server, embed=embed)
 
@@ -395,32 +395,32 @@ class Grenzpolizei:
         server = after.server
         if await self._validate_event(server):
             if before.name != after.name:
-                embed = discord.Embed(color=self.orange)
+                embed = discord.Embed(color=self.blue)
                 embed.set_author(name='Role {0.name} renamed to {1.name}'.format(before, after), icon_url=server.icon_url)
                 await self._send_message_to_channel(server, embed=embed)
             if before.color != after.color:
-                embed = discord.Embed(color=self.green)
+                embed = discord.Embed(color=self.blue)
                 embed.set_author(name='Role color \'{0.name}\' changed from {0.color} to {1.color}'.format(before, after), icon_url=server.icon_url)
                 await self._send_message_to_channel(server, embed=embed)
             if before.mentionable != after.mentionable:
-                embed = discord.Embed(color=self.orange)
+                embed = discord.Embed(color=self.blue)
                 if after.mentionable:
                     embed.set_author(name='Role \'{0.name}\' is now mentionable'.format(after), icon_url=server.icon_url)
                 else:
                     embed.set_author(name='Role \'{0.name}\' is no longer mentionable'.format(after), icon_url=server.icon_url)
                 await self._send_message_to_channel(server, embed=embed)
             if before.hoist != after.hoist:
-                embed = discord.Embed(color=self.orange)
+                embed = discord.Embed(color=self.blue)
                 if after.hoist:
                     embed.set_author(name='Role \'{0.name}\' is now shown seperately'.format(after), icon_url=server.icon_url)
                 else:
                     embed.set_author(name='Role \'{0.name}\' is no longer shown seperately'.format(after), icon_url=server.icon_url)
             if before.permissions != after.permissions:
-                embed = discord.Embed(color=self.orange)
+                embed = discord.Embed(color=self.blue)
                 embed.set_author(name='Role permissions \'{0.name}\' changed from {0.permissions.value} to {1.permissions.value}'.format(before, after), icon_url=server.icon_url)
                 await self._send_message_to_channel(server, embed=embed)
             if before.position != after.position:
-                embed = discord.Embed(color=self.green)
+                embed = discord.Embed(color=self.blue)
                 embed.set_author(name='Role position \'{0}\' changed from {0.position} to {1.position}'.format(before, after), icon_url=server.icon_url)
                 await self._send_message_to_channel(server, embed=embed)
 
@@ -428,19 +428,19 @@ class Grenzpolizei:
         server = after.server
         if await self._validate_event(server):
             if before.owner != after.owner:
-                embed = discord.Embed(color=self.orange)
+                embed = discord.Embed(color=self.blue)
                 embed.set_author(name='Server owner changed from {0.owner.name} (id {0.owner.id}) to {1.owner.name} (id {1.owner.id})'.format(before, after), icon_url=server.icon_url)
                 await self._send_message_to_channel(server, embed=embed)
             if before.region != after.region:
-                embed = discord.Embed(color=self.green)
+                embed = discord.Embed(color=self.blue)
                 embed.set_author(name='Server region changed from {0.region} to {1.region}'.format(before, after), icon_url=server.icon_url)
                 await self._send_message_to_channel(server, embed=embed)
             if before.name != after.name:
-                embed = discord.Embed(color=self.red)
+                embed = discord.Embed(color=self.blue)
                 embed.set_author(name='Server name changed from {0.name} to {1.name}'.format(before, after), icon_url=server.icon_url)
                 await self._send_message_to_channel(server, embed=embed)
             if before.icon_url != after.icon_url:
-                embed = discord.Embed(color=self.green)
+                embed = discord.Embed(color=self.blue)
                 embed.set_author(name='Server icon changed from {0.icon_url} to {1.icon_url}'.format(before, after), icon_url=server.icon_url)
                 await self._send_message_to_channel(server, embed=embed)
 
