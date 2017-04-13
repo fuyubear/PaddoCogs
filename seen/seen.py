@@ -19,7 +19,6 @@ class Seen:
         while self == self.bot.get_cog("Seen"):
             if self.new_data:
                 await asyncio.sleep(60)
-                print("Writing data to seen.json")
                 dataIO.save_json("data/seen/seen.json", self.seen)
                 self.new_data = False
             else:
@@ -30,15 +29,14 @@ class Seen:
         '''seen <@username>'''
         server = context.message.server
         author = username
-        if [author.id in self.seen[server.id] if server.id in self.seen else False]:
+        print([[True if author.id in self.seen[server.id] else False] if server.id in self.seen else False])
+        if [[True if author.id in self.seen[server.id] else False] if server.id in self.seen else False]:
             data = self.seen[server.id][author.id]
             ts = data['TIMESTAMP']
-            last_message = data['MESSAGE']
             channel = await self._get_channel(data['CHANNEL'])
-            em = discord.Embed(description='\a\n{}'.format(last_message), color=discord.Color.green())
+            em = discord.Embed(color=discord.Color.green())
             avatar = author.avatar_url if author.avatar else author.default_avatar_url
-            em.set_author(name='{} was last seen on {} UTC'.format(author.display_name, ts), icon_url=avatar)
-            em.add_field(name='\a', value='**Channel:** #{}'.format(channel.name))
+            em.set_author(name='{} was last seen on {} UTC in #{}'.format(author.display_name, ts, channel.name), icon_url=avatar)
             await self.bot.say(embed=em)
         else:
             message = 'I haven\'t seen {} yet.'.format(author.display_name)
@@ -52,7 +50,6 @@ class Seen:
             ts = message.timestamp
             data = {}
             data['TIMESTAMP'] = '{} {}:{}:{}'.format(ts.date(), ts.hour, ts.minute, ts.second)
-            data['MESSAGE'] = message.clean_content
             data['CHANNEL'] = channel.id
             if server.id not in self.seen:
                 self.seen[server.id] = {}
