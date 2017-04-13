@@ -94,10 +94,16 @@ class Grenzpolizei:
         if message:
             if any(n in message.content.lower() for n in ['yes', 'y']):
                 await self.bot.edit_message(bot_message, '**{} Yes**'.format(question))
-                await self.bot.delete_message(message)
+                try:
+                    await self.bot.delete_message(message)
+                except:
+                    pass
                 return True
         await self.bot.edit_message(bot_message, '**{} No**'.format(question))
-        await self.bot.delete_message(message)
+        try:
+            await self.bot.delete_message(message)
+        except:
+            pass
         return False
 
     async def _what_channel(self, question, author):
@@ -106,12 +112,18 @@ class Grenzpolizei:
         if message:
             channel = message.raw_channel_mentions[0]
             await self.bot.edit_message(bot_message, '**{}**'.format(question))
-            await self.bot.delete_message(message)
+            try:
+                await self.bot.delete_message(message)
+            except:
+                pass
             if channel:
                 return channel
             else:
                 return False
-        await self.bot.delete_message(message)
+        try:
+            await self.bot.delete_message(message)
+        except:
+            pass
         return False
 
     async def _setup_questions(self, context):
