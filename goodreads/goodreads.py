@@ -45,6 +45,7 @@ class Goodreads:
             book = parse['GoodreadsResponse']['book']
             book_url = book['url']
             book_title = book['title']
+            book_image = book['image_url']
             if book_title is None:
                 book_title = 'No title'
             book_rating = book['average_rating']
@@ -73,7 +74,7 @@ class Goodreads:
             em.add_field(name='\a', value=book_description, inline=False)
             em.add_field(name='\a', value='\a', inline=False)
             em.set_footer(text='Information provided by Goodreads', icon_url='https://s.gr-assets.com/assets/icons/goodreads_icon_16x16-fc141070fc3ea1a7cd145a4af570ec14.png')
-            em.set_thumbnail(url='https://images.gr-assets.com/books/1377787655s/15730101.jpg')
+            em.set_thumbnail(url=book_image)
             return em
         else:
             return '**I couldn\'t find that!**'
