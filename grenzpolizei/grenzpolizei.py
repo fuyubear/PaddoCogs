@@ -21,6 +21,7 @@ class Grenzpolizei:
         self.event_types['on_member_remove'] = 'member_event_channel'
         self.event_types['on_member_ban'] = 'member_event_channel'
         self.event_types['on_member_unban'] = 'member_event_channel'
+        self.event_types['on_member_update'] = 'member_event_channel'
         self.event_types['on_voice_state_update'] = 'member_event_channel'
 
         self.event_types['on_message_edit'] = 'message_event_channel'
@@ -151,6 +152,7 @@ class Grenzpolizei:
             self.settings[server.id]['events']['on_member_ban'] = await self._yes_no('Do you want to log members being banned? [y]es/[n]o', author)
             self.settings[server.id]['events']['on_member_unban'] = await self._yes_no('Do you want to log members being unbanned? [y]es/[n]o', author)
             self.settings[server.id]['events']['on_member_remove'] = await self._yes_no('Do you want to log members leaving this server? [y]es/[n]o', author)
+            self.settings[server.id]['events']['on_member_update'] = await self._yes_no('Do you want to log member changes? [y]es/[n]o', author)
             self.settings[server.id]['events']['on_voice_state_update'] = await self._yes_no('Do you want to log voice channel changes? [y]es/[n]o', author)
 
             # Message events
@@ -303,32 +305,56 @@ class Grenzpolizei:
         server = member.server
         if await self._validate_event(server) and member.id != self.bot.user.id:
             avatar = member.avatar_url if member.avatar else member.default_avatar_url
-            embed = discord.Embed(color=self.green)
-            embed.set_author(name='{0.name}#{0.discriminator} ({0.id}) has joined'.format(member), icon_url=avatar)
+            embed = discord.Embed(color=self.green, description='**{0.name}#{0.discriminator}** ({0.id})'.format(member))
+            embed.set_author(name='Member joined', icon_url=avatar)
             await self._send_message_to_channel(server, embed=embed)
 
     async def on_member_ban(self, member):
         server = member.server
         if await self._validate_event(server) and member.id != self.bot.user.id:
             avatar = member.avatar_url if member.avatar else member.default_avatar_url
-            embed = discord.Embed(color=self.red)
-            embed.set_author(name='{0.name}#{0.discriminator} ({0.display_name} {0.id}) has been banned'.format(member), icon_url=avatar)
+            embed = discord.Embed(color=self.red, description='**{0.name}#{0.discriminator}** ({0.display_name} {0.id})'.format(member))
+            embed.set_author(name='Member banned', icon_url=avatar)
             await self._send_message_to_channel(server, embed=embed)
 
     async def on_member_unban(self, server, member):
         if await self._validate_event(server) and member.id != self.bot.user.id:
             avatar = member.avatar_url if member.avatar else member.default_avatar_url
-            embed = discord.Embed(color=self.orange)
-            embed.set_author(name='{0.name}#{0.discriminator} ({0.id}) has been unbanned'.format(member), icon_url=avatar)
+            embed = discord.Embed(color=self.orange, description='**{0.name}#{0.discriminator}** ({0.id})'.format(member))
+            embed.set_author(name='Member unbanned', icon_url=avatar)
             await self._send_message_to_channel(server, embed=embed)
 
     async def on_member_remove(self, member):
         server = member.server
         if await self._validate_event(server) and member.id != self.bot.user.id:
             avatar = member.avatar_url if member.avatar else member.default_avatar_url
-            embed = discord.Embed(color=self.red)
-            embed.set_author(name='{0.name}#{0.discriminator} ({0.display_name} {0.id}) has left'.format(member), icon_url=avatar)
+            embed = discord.Embed(color=self.red, description='**{0.name}#{0.discriminator}** ({0.display_name} {0.id})'.format(member))
+            embed.set_author(name='A member left the server', icon_url=avatar)
             await self._send_message_to_channel(server, embed=embed)
+
+    async def on_member_update(self, before, after):
+        server = after.server
+        if await self._validate_event(server) and after.id != self.bot.user.id:
+            if before.name != after.name:
+                embed = discord.Embed(color=self.blue, description='From **{0.name}** ({0.id}) to **{1.name}**'.format(before, after))
+                embed.set_author(name='A member changed their name', icon_url=server.icon_url)
+                await self._send_message_to_channel(server, embed=embed)
+            if before.nick != after.nick:
+                embed = discord.Embed(color=self.blue, description='From **{0.nick}** ({0.id}) to **{1.nick}**'.format(before, after))
+                embed.set_author(name='A member changed their nickname', icon_url=server.icon_url)
+                await self._send_message_to_channel(server, embed=embed)
+            if before.roles != after.roles:
+                if len(before.roles) > len(after.roles):
+                    for role in before.roles:
+                        if role not in after.roles:
+                            embed = discord.Embed(color=self.blue, description='**{0.display_name}** ({0.id}) lost the **{1.name}** role'.format(before, role))
+                            embed.set_author(name='A role has been removed from a member', icon_url=server.icon_url)
+                elif len(before.roles) < len(after.roles):
+                    for role in after.roles:
+                        if role not in before.roles:
+                            embed = discord.Embed(color=self.blue, description='**{0.display_name}** ({0.id}) got the **{1.name}** role'.format(before, role))
+                            embed.set_author(name='A role has been applied to a member', icon_url=server.icon_url)
+                await self._send_message_to_channel(server, embed=embed)
 
     async def on_message_delete(self, message):
         server = message.server
@@ -337,7 +363,8 @@ class Grenzpolizei:
         if await self._validate_event(server) and member.id != self.bot.user.id:
             embed = discord.Embed(color=self.red)
             avatar = member.avatar_url if member.avatar else member.default_avatar_url
-            embed.set_author(name='A message by {0.display_name}#{0.discriminator} ({0.id}) has been removed'.format(member), icon_url=avatar)
+            embed.set_author(name='Message removed'.format(member), icon_url=avatar)
+            embed.add_field(name='**Member**', value='{0.display_name}#{0.discriminator} ({0.id})'.format(member))
             embed.add_field(name='**Channel**', value=message.channel.name)
             embed.add_field(name='**Message timestamp**', value=message.timestamp.strftime('%Y-%m-%d %H:%M:%S'))
             embed.add_field(name='**Removal timestamp**', value=timestamp.strftime('%Y-%m-%d %H:%M:%S'))
@@ -351,7 +378,8 @@ class Grenzpolizei:
         if await self._validate_event(server) and member.id != self.bot.user.id and before.clean_content != after.clean_content:
             embed = discord.Embed(color=self.blue)
             avatar = member.avatar_url if member.avatar else member.default_avatar_url
-            embed.set_author(name='A message by {0.display_name}#{0.discriminator} ({0.id}) has been edited'.format(member), icon_url=avatar)
+            embed.set_author(name='Message changed'.format(member), icon_url=avatar)
+            embed.add_field(name='**Member**', value='{0.display_name}#{0.discriminator}\n({0.id})'.format(member))
             embed.add_field(name='**Channel**', value=before.channel.name)
             embed.add_field(name='**Message timestamp**', value=before.timestamp.strftime('%Y-%m-%d %H:%M:%S'))
             embed.add_field(name='**Edit timestamp**', value=timestamp.strftime('%Y-%m-%d %H:%M:%S'))
