@@ -53,7 +53,7 @@ class Grenzpolizei:
     async def _validate_event(self, server):
         try:
             return self.settings[server.id]['events'][inspect.stack()[1][3]] if await self._validate_server(server) else False
-        except:
+        except KeyError:
             return False
 
     async def _get_channel(self, server):
