@@ -51,7 +51,10 @@ class Grenzpolizei:
         return self.settings[server.id]['file_logging'] if await self._validate_server(server) else False
 
     async def _validate_event(self, server):
-        return self.settings[server.id]['events'][inspect.stack()[1][3]] if await self._validate_server(server) else False
+        try:
+            return self.settings[server.id]['events'][inspect.stack()[1][3]] if await self._validate_server(server) else False
+        except:
+            return False
 
     async def _get_channel(self, server):
         return discord.utils.get(self.bot.get_all_channels(), id=self.settings[server.id]['channels'][self.event_types[inspect.stack()[2][3]]])
