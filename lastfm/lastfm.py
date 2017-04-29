@@ -1,4 +1,5 @@
 import os
+import urllib
 import discord
 import aiohttp
 import datetime
@@ -19,6 +20,12 @@ class Lastfm:
         self.payload = {}
         self.payload['api_key'] = self.api_key
         self.payload['format'] = 'json'
+
+    async def _url_decode(self, url):
+        # Fuck non-ascii URLs!!!@##$@
+        url = urllib.parse.urlparse(url)
+        url = '{0.scheme}://{0.netloc}{1}'.format(url, urllib.parse.quote(url.path))
+        return url
 
     async def _api_request(self, payload):
         url = 'http://ws.audioscrobbler.com/2.0/'
@@ -140,7 +147,7 @@ Will remember your username after setting one. [p]lastfm last @username will bec
                     if track['@attr']['nowplaying'] == 'true':
                         artist = track['artist']['#text']
                         song = track['name']
-                        url = track['url']
+                        url = await self._url_decode(track['url'])
                         image = track['image'][-1]['#text']
                         author = context.message.author
                         em = discord.Embed(url=url)
@@ -190,7 +197,7 @@ Will remember your username after setting one. [p]lastfm last @username will bec
                 for i, track in enumerate(data['recenttracks']['track'], 1):
                     artist = track['artist']['#text']
                     song = track['name']
-                    url = track['url']
+                    url = await self._url_decode(track['url'])
                     if i < 10:
                         l += '`{}`\t  **[{}]({})** by **{}**\n'.format(str(i), song, url, artist)
                     elif i > 10:
@@ -238,7 +245,7 @@ Will remember your username after setting one. [p]lastfm last @username will bec
                 for i, track in enumerate(data['toptracks']['track'], 1):
                     artist = track['artist']['name']
                     song = track['name']
-                    url = track['url']
+                    url = await self._url_decode(track['url'])
                     plays = track['playcount']
                     if i < 10:
                         l += '`{}`\t  **[{}]({})** by **{}** ({} plays)\n'.format(str(i), song, url, artist, plays)
@@ -286,7 +293,7 @@ Will remember your username after setting one. [p]lastfm last @username will bec
                 l = ''
                 for i, artist in enumerate(data['topartists']['artist'], 1):
                     artist_a = artist['name']
-                    url = artist['url']
+                    url = await self._url_decode(artist['url'])
                     plays = artist['playcount']
                     if i < 10:
                         l += '`{}`\t  **[{}]({})** ({} plays)\n'.format(str(i), artist_a, url, plays)
@@ -336,7 +343,7 @@ Will remember your username after setting one. [p]lastfm last @username will bec
                 for i, album in enumerate(data['topalbums']['album'], 1):
                     albums = album['name']
                     artist = album['artist']['name']
-                    url = album['url']
+                    url = await self._url_decode(album['url'])
                     plays = album['playcount']
                     if i < 10:
                         l += '`{}`\t  **[{}]({})** by **({})** ({} plays)\n'.format(str(i), albums, url, artist, plays)
