@@ -332,7 +332,7 @@ class Grenzpolizei:
         if await self._validate_event(server) and member.id != self.bot.user.id:
             avatar = member.avatar_url if member.avatar else member.default_avatar_url
             embed = discord.Embed(color=self.red, description='**{0.name}#{0.discriminator}** ({0.display_name} {0.id})'.format(member))
-            embed.set_author(name='A member left the server', icon_url=avatar)
+            embed.set_author(name='Member left', icon_url=avatar)
             await self._send_message_to_channel(server, embed=embed)
 
     async def on_member_update(self, before, after):
@@ -340,23 +340,23 @@ class Grenzpolizei:
         if await self._validate_event(server) and after.id != self.bot.user.id:
             if before.name != after.name:
                 embed = discord.Embed(color=self.blue, description='From **{0.name}** ({0.id}) to **{1.name}**'.format(before, after))
-                embed.set_author(name='A member changed their name', icon_url=server.icon_url)
+                embed.set_author(name='Name changed', icon_url=server.icon_url)
                 await self._send_message_to_channel(server, embed=embed)
             if before.nick != after.nick:
                 embed = discord.Embed(color=self.blue, description='From **{0.nick}** ({0.id}) to **{1.nick}**'.format(before, after))
-                embed.set_author(name='A member changed their nickname', icon_url=server.icon_url)
+                embed.set_author(name='Nickname changed', icon_url=server.icon_url)
                 await self._send_message_to_channel(server, embed=embed)
             if before.roles != after.roles:
                 if len(before.roles) > len(after.roles):
                     for role in before.roles:
                         if role not in after.roles:
                             embed = discord.Embed(color=self.blue, description='**{0.display_name}** ({0.id}) lost the **{1.name}** role'.format(before, role))
-                            embed.set_author(name='A role has been removed from a member', icon_url=server.icon_url)
+                            embed.set_author(name='Role removed', icon_url=server.icon_url)
                 elif len(before.roles) < len(after.roles):
                     for role in after.roles:
                         if role not in before.roles:
                             embed = discord.Embed(color=self.blue, description='**{0.display_name}** ({0.id}) got the **{1.name}** role'.format(before, role))
-                            embed.set_author(name='A role has been applied to a member', icon_url=server.icon_url)
+                            embed.set_author(name='Role applied', icon_url=server.icon_url)
                 await self._send_message_to_channel(server, embed=embed)
 
     async def on_message_delete(self, message):
