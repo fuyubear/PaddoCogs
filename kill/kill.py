@@ -30,7 +30,7 @@ class Kill:
         await self.bot.say(message)
 
     @commands.command(pass_context=True, name='removekill')
-    @checks.is_owner()
+    @checks.mod_or_permissions(administrator=True)
     async def _removekill(self, context, name):
         """Remove a kill"""
         server = context.message.server
@@ -43,7 +43,7 @@ class Kill:
         await self.bot.say(message)
 
     @commands.command(pass_context=True, name='addkill')
-    @checks.is_owner()
+    @checks.mod_or_permissions(administrator=True)
     async def _addkill(self, context, name, *kill_text):
         """Variables:
         {killer} adds the name of the killer
