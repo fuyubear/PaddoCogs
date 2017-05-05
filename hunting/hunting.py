@@ -84,7 +84,11 @@ class Hunting:
     async def _next(self):
         """When will the next occurance happen?"""
         if self.next:
-            message = '**The next occurance will be at {} UTC**'.format(self.next)
+            time = abs(datetime.datetime.utcnow() - self.next)
+            total_seconds = int(time.total_seconds())
+            hours, remainder = divmod(total_seconds, 60*60)
+            minutes, seconds = divmod(remainder, 60)
+            message = '**The next occurance will be in {} hours and {} minutes.**'.format(hours, minutes)
         else:
             message = '**There is currently no hunt.**'
         await self.bot.say(message)
