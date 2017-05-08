@@ -86,15 +86,14 @@ class Statistics:
 
     @commands.command(no_pm=True, pass_context=True)
     @checks.serverowner_or_permissions(manage_server=True)
-    async def clearstatschannel(self, context, channel: discord.Channel=None):
+    async def clearstatschannel(self):
         """
         Clear statistics channel
         """
-        if channel:
-            self.settings['CHANNEL_ID'] = False
-            dataIO.save_json('data/statistics/settings.json', self.settings)
-            message = 'Channel cleared'
-            await self.bot.say(message)
+        self.settings['CHANNEL_ID'] = False
+        dataIO.save_json('data/statistics/settings.json', self.settings)
+        message = 'Channel cleared'
+        await self.bot.say(message)
 
     async def retrieve_statistics(self):
         name = self.bot.user.name
