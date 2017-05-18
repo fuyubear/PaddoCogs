@@ -1,9 +1,0 @@
-{
-    "AUTHOR" : "Paddolicious#8880",
-    "NAME" : "PaddoCogManager",
-    "SHORT" : "A new way of managing cogs.",
-    "INSTALL_MSG" : "Install cogs quickly without specifying repo names",
-    "DESCRIPTION" : "Install cogs quickly without specifying repo names",
-    "DISABLED" : true,
-    "TAGS": ["cogs", "package", "manager"]
-}
