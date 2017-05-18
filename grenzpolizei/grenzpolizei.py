@@ -8,6 +8,12 @@ from discord.ext import commands
 from __main__ import send_cmd_help
 from cogs.utils.dataIO import dataIO
 
+# TODO
+# Rewrite for new Discord.py
+# More efficient Python formatting
+# Things I forgot...
+
+
 DB_VERSION = 2
 
 
@@ -366,12 +372,16 @@ class Grenzpolizei:
         if await self._validate_event(server) and member.id != self.bot.user.id:
             embed = discord.Embed(color=self.red)
             avatar = member.avatar_url if member.avatar else member.default_avatar_url
-            embed.set_author(name='Message removed'.format(member), icon_url=avatar)
+            embed.set_author(name='Message removed', icon_url=avatar)
             embed.add_field(name='**Member**', value='{0.display_name}#{0.discriminator} ({0.id})'.format(member))
             embed.add_field(name='**Channel**', value=message.channel.name)
             embed.add_field(name='**Message timestamp**', value=message.timestamp.strftime('%Y-%m-%d %H:%M:%S'))
             embed.add_field(name='**Removal timestamp**', value=timestamp.strftime('%Y-%m-%d %H:%M:%S'))
-            embed.add_field(name='**Message**', value=message.content, inline=False)
+            if message.content:
+                embed.add_field(name='**Message**', value=message.content, inline=False)
+            if message.attachments:
+                for attachment in message.attachments:
+                    embed.add_field(name='**Attachment**', value='[{filename}]({url})'.format(**attachment), inline=True)
             await self._send_message_to_channel(server, embed=embed)
 
     async def on_message_edit(self, before, after):
