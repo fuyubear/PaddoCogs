@@ -99,7 +99,7 @@ class Hunting:
         server = context.message.server
         if server.id in self.scores:
             if member.id in self.scores[server.id]:
-                message = '**{} shot a total of {} animals ({})**'.format(member.mention, self.scores[server.id][member.id]['total'], ', '.join([str(self.scores[server.id][member.id][x]) + ' ' + x.capitalize() + 's' for x in self.scores[server.id][member.id] if x != 'total']))
+                message = '**{} shot a total of {} animals ({})**'.format(member.mention, self.scores[server.id][member.id]['total'], ', '.join([str(self.scores[server.id][member.id]['score'][x]) + ' ' + x.capitalize() + 's' for x in self.scores[server.id][member.id]['score']]))  # (', '.join([str(self.scores[server.id][member.id]['score'][x]) + ' ' + x.capitalize() + 's' for x in self.scores[server.id][member.id]['score']]))
             else:
                 message = '**Please shoot something before you can brag about it.**'
         else:
