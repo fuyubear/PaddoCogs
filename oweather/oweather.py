@@ -297,7 +297,7 @@ class Weather:
             request = await self._api_request(location)
             if request['cod'] == 200:
                 weather = await self._parse_data(request)
-                message = '{0.celcius:.1f} °C / {0.fahrenheit:.1f} °F in {0.place}, {0.country}'.format(weather)
+                message = '**{0.celcius:.1f} °C / {0.fahrenheit:.1f} °F in {0.place}, {0.country}**'.format(weather)
                 await self.bot.say(message)
             else:
                 await self.bot.say('Can\'t find this location!')
