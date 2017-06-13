@@ -144,7 +144,7 @@ class Grenzpolizei:
         instructions += 'You get **2 minutes** to answer each question. If not answered it will be defaulted to **\'no\'**.\n\n'
         instructions += 'Then you\'re required to give a channel for each event category, these categories are:\n\n'
         instructions += '**- member events**\n**- message events**\n**- server events**\n**- warning events.**\n\n'
-        instructions += 'Each channel _needs_ to be a channel mention, otherwise it won\'t work. You can use the same channel.\n\n'
+        instructions += 'Each channel _needs_ to be a channel mention, otherwise it won\'t work. You can use the same channel for all event types. Be also sure to give the bot permissions to post and embed messages in that channel.\n\n'
         instructions += '**Good luck!**'
 
         embed = discord.Embed(title='**Welcome to the setup for Grenzpolizei**', description=instructions, color=self.green)
