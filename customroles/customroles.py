@@ -156,6 +156,17 @@ class CustomRoles:
             message = 'I do not have the permissions to change that for you. Please give me the permissions to manage roles.'
         await self.bot.say(message)
 
+    @_role.command(pass_context=True, no_pm=True, name='list')
+    async def _list(self, context):
+        """List all available roles"""
+        server = context.message.server
+        message = '```All available roles on {}\n\n'.format(server.name)
+        if server.id in self.roles:
+            for role in self.roles[server.id]:
+                message += '{}\n'.format(role)
+        message += '```'
+        await self.bot.say(message)
+
 
 def check_folder():
     if not os.path.exists('data/customroles'):
