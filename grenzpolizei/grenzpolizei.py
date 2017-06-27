@@ -140,7 +140,7 @@ class Grenzpolizei:
         server = context.message.server
         author = context.message.author
         instructions = '''Thank you for using Grenzpolizei! However, this cog requires some setting up. A dozen or so questions will be asked,
-                            and you\'re required to answer them with either **\'yes\'** or **\'no\'** anwers.\n\n'''
+                            and you\'re required to answer them with either **\'yes\'** or **\'no\'** answers.\n\n'''
         instructions += 'You get **2 minutes** to answer each question. If not answered it will be defaulted to **\'no\'**.\n\n'
         instructions += 'Then you\'re required to give a channel for each event category, these categories are:\n\n'
         instructions += '**- member events**\n**- message events**\n**- server events**\n**- warning events.**\n\n'
