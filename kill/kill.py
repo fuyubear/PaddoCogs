@@ -25,6 +25,12 @@ class Kill:
             x = list(self.kills[server.id].keys())
         if x:
             message = self.kills[server.id][random.choice(x)]['text'].format(victim=victim.display_name, killer=author.display_name)
+            if victim.id == author.id:
+                await self.bot.say("Seppuku is not allowed, though, I'd love to see it")
+            elif victim.id == self.bot.user.id:
+                await self.bot.say("Don't even try!")
+            else:
+                await self.bot.say(message)
         else:
             message = 'I don\'t know how to kill yet. Use `{}addkill` to add kills.'.format(context.prefix)
         await self.bot.say(message)
