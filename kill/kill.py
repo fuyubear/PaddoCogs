@@ -20,10 +20,8 @@ class Kill:
         """Randomly chooses a kill."""
         server = context.message.server
         author = context.message.author
-        x = None
         if server.id in self.kills:
             x = list(self.kills[server.id].keys())
-        if x:
             if victim.id == author.id:
                 message = 'I refuse to kill myself!'
             elif victim.id == self.bot.user.id:
