@@ -3,5 +3,6 @@
     "NAME" : "Spotify",
     "SHORT" : "Search for a song on Spotify",
     "DESCRIPTION" : "Search for a song on Spotify",
-    "TAGS": ["Spotify", "music", "search"]
+    "TAGS": ["Spotify", "music", "search"],
+    "REQUIREMENTS" : ["spotipy"]
 }
