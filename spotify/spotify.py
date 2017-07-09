@@ -22,7 +22,9 @@ class Spotify:
         return results
 
     async def escape(self, s):
-        return s.translate(str.maketrans({"[":  r"\[", "]":  r"\]", "(":  r"\(", ")":  r"\)", "{":  r"\{", "}":  r"\}"}))
+        if s:
+            return s.translate(str.maketrans({"[":  r"\[", "]":  r"\]", "(":  r"\(", ")":  r"\)", "{":  r"\{", "}":  r"\}"}))
+        return s
 
     async def _save_settings(self):
         dataIO.save_json('data/spotify/settings.json', self.settings)
@@ -39,14 +41,14 @@ class Spotify:
                     track = await self.escape(item['name'])
                     artist = await self.escape(item['artists'][0]['name'])
                     url = item['external_urls']['spotify']
-                    if i < 10:
-                        l += '`{}`\t  **[{}]({})** by **{}**\n'.format(str(i), track, url, artist)
-                    elif i > 10:
+                    preview_url = await self.escape(item['preview_url'])
+                    if i < 6:
+                        l += '{} **[{}]({})** by **{}**\n\n'.format('[:arrow_forward:]({})'.format(preview_url) if preview_url else ':stop_button:', track, url, artist)
+                    elif i > 6:
                         break
-                    else:
-                        l += '`{}`\t**[{}]({})** by **{}**\n'.format(str(i), track, url, artist)
-                em = discord.Embed(title='**Search results:**', description=l)
-                em.set_footer(icon_url='https://upload.wikimedia.org/wikipedia/commons/thumb/1/19/Spotify_logo_without_text.svg/2000px-Spotify_logo_without_text.svg.png', text='Powered by Spotify')
+                l += '\a'
+                em = discord.Embed(title='Search results for "{}":'.format(query), description=l)
+                em.set_footer(icon_url='https://upload.wikimedia.org/wikipedia/commons/thumb/1/19/Spotify_logo_without_text.svg/2000px-Spotify_logo_without_text.svg.png', text='Powered by Spotify (▶️ preview available ⏹️ no preview available)')
                 await self.bot.say(embed=em)
             else:
                 await self.bot.say('**I\'m sorry, but I couldn\'t find anything.**')
