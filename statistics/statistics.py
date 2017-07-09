@@ -211,4 +211,5 @@ def setup(bot):
         check_file()
         n = Statistics(bot)
         bot.add_cog(n)
-        bot.loop.create_task(n.reload_stats())
+        loop = asyncio.get_event_loop()
+        loop.create_task(n.reload_stats())
