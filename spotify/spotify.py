@@ -18,7 +18,7 @@ class Spotify:
 
     async def _api_request(self, query):
         sp = spotipy.Spotify(client_credentials_manager=SpotifyClientCredentials(self.settings['client_id'], self.settings['client_secret']))
-        results = sp.search(query, limit=10, type='track')
+        results = sp.search(query, limit=5, type='track')
         return results
 
     async def escape(self, s):
@@ -42,10 +42,9 @@ class Spotify:
                     artist = await self.escape(item['artists'][0]['name'])
                     url = item['external_urls']['spotify']
                     preview_url = await self.escape(item['preview_url'])
-                    if i < 6:
-                        l += '{} **[{}]({})** by **{}**\n\n'.format('[:arrow_forward:]({})'.format(preview_url) if preview_url else ':stop_button:', track, url, artist)
-                    elif i > 6:
+                    if i > 5:
                         break
+                    l += '{} **[{}]({})** by **{}**\n\n'.format('[:arrow_forward:]({})'.format(preview_url) if preview_url else ':stop_button:', track, url, artist)
                 l += '\a'
                 em = discord.Embed(title='Search results for "{}":'.format(query), description=l)
                 em.set_footer(icon_url='https://upload.wikimedia.org/wikipedia/commons/thumb/1/19/Spotify_logo_without_text.svg/2000px-Spotify_logo_without_text.svg.png', text='Powered by Spotify (▶️ preview available ⏹️ no preview available)')
