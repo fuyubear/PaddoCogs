@@ -7,6 +7,7 @@ import datetime
 import asyncio
 import discord
 import os
+import json
 
 try:
     import psutil
@@ -23,6 +24,28 @@ class Statistics:
         self.bot = bot
         self.settings = dataIO.load_json('data/statistics/settings.json')
         self.refresh_rate = self.settings['REFRESH_RATE']
+
+    async def foo(self):
+        return '{0.name}#{0.discriminator}'.format(await self.bot.get_user_info(self.bot.settings.owner))
+
+    def redapi_hook(self, data=None):
+        if not data:
+            x = json.loads(json.dumps(self.retrieve_statistics()._asdict()))
+            x['avatar'] = self.bot.user.avatar_url if self.bot.user.avatar else self.bot.user.default_avatar_url
+            x['uptime'] = self.get_bot_uptime(brief=False)
+            x['total_cogs'] = len(self.bot.cogs)
+            x['total_commands'] = len(self.bot.commands)
+            x['discord_version'] = str(discord.__version__)
+            x['id'] = self.bot.user.id
+            x['discriminator'] = self.bot.user.discriminator
+            x['created_at'] = self.bot.user.created_at.strftime('%B %d, %Y at %H:%M:%S')
+            x['loaded_cogs'] = [cog for cog in self.bot.cogs]
+            x['prefixes'] = self.bot.settings.prefixes
+            x['servers'] = [{'name': server.name, 'members': len(server.members), 'icon_url': server.icon_url} for server in self.bot.servers]
+            x['cogs'] = len(self.bot.cogs)
+            return x
+        else:
+            pass
 
     @commands.command()
     async def stats(self):
@@ -104,7 +127,7 @@ class Statistics:
         em.add_field(name='**Uptime**', value='{}'.format(self.get_bot_uptime(brief=True)))
 
         em.add_field(name='**Users**', value=stats.users)
-        em.add_field(name='**Servers**', value=stats.servers)
+        em.add_field(name='**Servers**', value=stats.total_servers)
 
         em.add_field(name='**Channels**', value=str(stats.channels))
         em.add_field(name='**Text channels**', value=str(stats.text_channels))
@@ -150,11 +173,11 @@ class Statistics:
 
         stats = collections.namedtuple(
                 'stats',
-                ['name', 'users', 'servers', 'commands_run', 'read_messages', 'text_channels', 'voice_channels', 'channels', 'cpu_usage', 'mem_v'],
+                ['name', 'users', 'total_servers', 'commands_run', 'read_messages', 'text_channels', 'voice_channels', 'channels', 'cpu_usage', 'mem_v'],
                 verbose=False, rename=False
                 )
         return stats(
-                name=name, users=users, servers=servers, commands_run=commands_run,
+                name=name, users=users, total_servers=servers, commands_run=commands_run,
                 read_messages=read_messages, text_channels=text_channels,
                 voice_channels=voice_channels, channels=channels,
                 cpu_usage=cpu_usage, mem_v=mem_v
