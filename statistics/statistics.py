@@ -221,8 +221,8 @@ class Statistics:
                 else:
                     pass
                 await asyncio.sleep(self.refresh_rate)
-            except:
-                pass
+            except Exception as e:
+                print(e)
 
 
 def check_folder():
