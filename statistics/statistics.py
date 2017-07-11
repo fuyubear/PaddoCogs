@@ -23,9 +23,6 @@ class Statistics:
         self.settings = dataIO.load_json('data/statistics/settings.json')
         self.refresh_rate = self.settings['REFRESH_RATE']
 
-    async def foo(self):
-        return '{0.name}#{0.discriminator}'.format(await self.bot.get_user_info(self.bot.settings.owner))
-
     def redapi_hook(self, data=None):
         if not data:
             x = self.retrieve_statistics()
@@ -219,8 +216,9 @@ class Statistics:
                 else:
                     pass
                 await asyncio.sleep(self.refresh_rate)
-            except Exception as e:
-                print(e)
+            except:
+                print('statistics.py: Something critical went wrong, disabling statistics reloading.')
+                break
 
 
 def check_folder():
@@ -231,9 +229,7 @@ def check_folder():
 
 def check_file():
     data = {}
-    data['CHANNEL_ID'] = ''
-    data['SENT_MESSAGES'] = 0
-    data['RECEIVED_MESSAGES'] = 0
+    data['CHANNEL_ID'] = None
     data['REFRESH_RATE'] = 5
     f = 'data/statistics/settings.json'
     if not dataIO.is_valid_json(f):
