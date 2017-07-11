@@ -401,34 +401,37 @@ class Grenzpolizei:
             await self._send_message_to_channel(server, embed=embed)
 
     async def on_channel_create(self, channel):
-        server = channel.server
-        if await self._validate_event(server):
-            embed = discord.Embed(color=self.green)
-            embed.set_author(name='A new channel has been created: #{0.name}'.format(channel), icon_url=server.icon_url)
-            await self._send_message_to_channel(server, embed=embed)
+        if not channel.is_private:
+            server = channel.server
+            if await self._validate_event(server):
+                embed = discord.Embed(color=self.green)
+                embed.set_author(name='A new channel has been created: #{0.name}'.format(channel), icon_url=server.icon_url)
+                await self._send_message_to_channel(server, embed=embed)
 
     async def on_channel_delete(self, channel):
-        server = channel.server
-        if await self._validate_event(server):
-            embed = discord.Embed(color=self.red)
-            embed.set_author(name='A channel has been deleted: #{0.name}'.format(channel), icon_url=server.icon_url)
-            await self._send_message_to_channel(server, embed=embed)
+        if not channel.is_private:
+            server = channel.server
+            if await self._validate_event(server):
+                embed = discord.Embed(color=self.red)
+                embed.set_author(name='A channel has been deleted: #{0.name}'.format(channel), icon_url=server.icon_url)
+                await self._send_message_to_channel(server, embed=embed)
 
     async def on_channel_update(self, before, after):
-        server = after.server
-        if await self._validate_event(server):
-            if before.name != after.name:
-                embed = discord.Embed(color=self.blue)
-                embed.set_author(name='#{0.name} renamed to #{1.name}'.format(before, after), icon_url=server.icon_url)
-                await self._send_message_to_channel(server, embed=embed)
-            if before.topic != after.topic:
-                embed = discord.Embed(color=self.blue)
-                embed.set_author(name='#{0.name} topic changed from \'{0.topic}\' to \'{1.topic}\''.format(before, after), icon_url=server.icon_url)
-                await self._send_message_to_channel(server, embed=embed)
-            if before.position != after.position:
-                embed = discord.Embed(color=self.blue)
-                embed.set_author(name='#{0.name} moved from {0.position} to {1.position}'.format(before, after), icon_url=server.icon_url)
-                await self._send_message_to_channel(server, embed=embed)
+        if not after.is_private:
+            server = after.server
+            if await self._validate_event(server):
+                if before.name != after.name:
+                    embed = discord.Embed(color=self.blue)
+                    embed.set_author(name='#{0.name} renamed to #{1.name}'.format(before, after), icon_url=server.icon_url)
+                    await self._send_message_to_channel(server, embed=embed)
+                if before.topic != after.topic:
+                    embed = discord.Embed(color=self.blue)
+                    embed.set_author(name='#{0.name} topic changed from \'{0.topic}\' to \'{1.topic}\''.format(before, after), icon_url=server.icon_url)
+                    await self._send_message_to_channel(server, embed=embed)
+                if before.position != after.position:
+                    embed = discord.Embed(color=self.blue)
+                    embed.set_author(name='#{0.name} moved from {0.position} to {1.position}'.format(before, after), icon_url=server.icon_url)
+                    await self._send_message_to_channel(server, embed=embed)
 
     async def on_server_role_create(self, role):
         server = role.server
