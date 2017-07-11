@@ -2,12 +2,10 @@ from discord.ext import commands
 from __main__ import send_cmd_help
 from .utils.dataIO import dataIO
 from .utils import checks
-import collections
 import datetime
 import asyncio
 import discord
 import os
-import json
 
 try:
     import psutil
@@ -30,7 +28,7 @@ class Statistics:
 
     def redapi_hook(self, data=None):
         if not data:
-            x = json.loads(json.dumps(self.retrieve_statistics()._asdict()))
+            x = self.retrieve_statistics()
             x['avatar'] = self.bot.user.avatar_url if self.bot.user.avatar else self.bot.user.default_avatar_url
             x['uptime'] = self.get_bot_uptime(brief=False)
             x['total_cogs'] = len(self.bot.cogs)
@@ -122,20 +120,19 @@ class Statistics:
         stats = self.retrieve_statistics()
         em = discord.Embed(description='\a\n', color=discord.Color.red())
         avatar = self.bot.user.avatar_url if self.bot.user.avatar else self.bot.user.default_avatar_url
-        em.set_author(name='Statistics of {}'.format(stats.name), icon_url=avatar)
+        em.set_author(name='Statistics of {}'.format(stats['name']), icon_url=avatar)
 
         em.add_field(name='**Uptime**', value='{}'.format(self.get_bot_uptime(brief=True)))
 
-        em.add_field(name='**Users**', value=stats.users)
-        em.add_field(name='**Servers**', value=stats.total_servers)
+        em.add_field(name='**Users**', value=stats['users'])
+        em.add_field(name='**Servers**', value=stats['total_servers'])
 
-        em.add_field(name='**Channels**', value=str(stats.channels))
-        em.add_field(name='**Text channels**', value=str(stats.text_channels))
-        em.add_field(name='**Voice channels**', value=str(stats.voice_channels))
+        em.add_field(name='**Channels**', value=str(stats['channels']))
+        em.add_field(name='**Text channels**', value=str(stats['text_channels']))
+        em.add_field(name='**Voice channels**', value=str(stats['voice_channels']))
 
-        em.add_field(name='**Messages received**',
-                     value=str(stats.read_messages))
-        em.add_field(name='**Commands run**', value=str(stats.commands_run))
+        em.add_field(name='**Messages received**', value=str(stats['read_messages']))
+        em.add_field(name='**Commands run**', value=str(stats['commands_run']))
         em.add_field(name='\a', value='\a')
 
         em.add_field(name='**Active cogs**', value=str(len(self.bot.cogs)))
@@ -143,10 +140,9 @@ class Statistics:
         em.add_field(name='\a', value='\a')
 
         em.add_field(name='\a', value='\a', inline=False)
-        em.add_field(name='**CPU usage**', value='{0:.1f}%'.format(stats.cpu_usage))
-        em.add_field(name='**Memory usage**', value='{0:.1f}%'.format(stats.mem_v))
-
-        em.add_field(name='\a', value='\a')
+        em.add_field(name='**CPU**', value='{0:.1f}%'.format(stats['cpu_usage']))
+        em.add_field(name='**Memory**', value='{0:.0f} MB ({1:.1f}%)'.format(stats['mem_v_mb'] / 1024 / 1024, stats['mem_v']))
+        em.add_field(name='**Threads**', value='{}'.format(stats['threads']))
         em.set_footer(text='API version {}'.format(discord.__version__))
         return em
 
@@ -159,10 +155,16 @@ class Statistics:
         text_channels = 0
         voice_channels = 0
 
-        cpu_p = psutil.cpu_percent(interval=None, percpu=True)
-        cpu_usage = sum(cpu_p) / len(cpu_p)
+        process = psutil.Process(os.getpid())
 
-        mem_v = psutil.virtual_memory().percent
+        cpu_usage = process.cpu_percent()
+
+        mem_v = process.memory_percent()
+        mem_v_mb = process.memory_info().vms
+        threads = process.num_threads()
+
+        io_reads = process.io_counters().read_count
+        io_writes = process.io_counters().write_count
 
         for channel in self.bot.get_all_channels():
             if channel.type == discord.ChannelType.text:
@@ -171,17 +173,13 @@ class Statistics:
                 voice_channels += 1
         channels = text_channels + voice_channels
 
-        stats = collections.namedtuple(
-                'stats',
-                ['name', 'users', 'total_servers', 'commands_run', 'read_messages', 'text_channels', 'voice_channels', 'channels', 'cpu_usage', 'mem_v'],
-                verbose=False, rename=False
-                )
-        return stats(
-                name=name, users=users, total_servers=servers, commands_run=commands_run,
-                read_messages=read_messages, text_channels=text_channels,
-                voice_channels=voice_channels, channels=channels,
-                cpu_usage=cpu_usage, mem_v=mem_v
-                )
+        stats = {
+            'name': name, 'users': users, 'total_servers': servers, 'commands_run': commands_run,
+            'read_messages': read_messages, 'text_channels': text_channels,
+            'voice_channels': voice_channels, 'channels': channels,
+            'cpu_usage': cpu_usage, 'mem_v': mem_v, 'mem_v_mb': mem_v_mb, 'threads': threads,
+            'io_reads': io_reads, 'io_writes': io_writes}
+        return stats
 
     def get_bot_uptime(self, *, brief=False):
         # Stolen from owner.py - Courtesy of Danny
