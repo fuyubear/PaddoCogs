@@ -387,18 +387,20 @@ class Grenzpolizei:
     async def on_message_edit(self, before, after):
         server = after.server
         member = after.author
+        channel = after.channel
         timestamp = datetime.utcnow()
-        if await self._validate_event(server) and member.id != self.bot.user.id and before.clean_content != after.clean_content:
-            embed = discord.Embed(color=self.blue)
-            avatar = member.avatar_url if member.avatar else member.default_avatar_url
-            embed.set_author(name='Message changed'.format(member), icon_url=avatar)
-            embed.add_field(name='**Member**', value='{0.display_name}#{0.discriminator}\n({0.id})'.format(member))
-            embed.add_field(name='**Channel**', value=before.channel.name)
-            embed.add_field(name='**Message timestamp**', value=before.timestamp.strftime('%Y-%m-%d %H:%M:%S'))
-            embed.add_field(name='**Edit timestamp**', value=timestamp.strftime('%Y-%m-%d %H:%M:%S'))
-            embed.add_field(name='**Before**', value=before.content, inline=False)
-            embed.add_field(name='**After**', value=after.content, inline=False)
-            await self._send_message_to_channel(server, embed=embed)
+        if not channel.is_private:
+            if await self._validate_event(server) and member.id != self.bot.user.id and before.clean_content != after.clean_content:
+                embed = discord.Embed(color=self.blue)
+                avatar = member.avatar_url if member.avatar else member.default_avatar_url
+                embed.set_author(name='Message changed'.format(member), icon_url=avatar)
+                embed.add_field(name='**Member**', value='{0.display_name}#{0.discriminator}\n({0.id})'.format(member))
+                embed.add_field(name='**Channel**', value=before.channel.name)
+                embed.add_field(name='**Message timestamp**', value=before.timestamp.strftime('%Y-%m-%d %H:%M:%S'))
+                embed.add_field(name='**Edit timestamp**', value=timestamp.strftime('%Y-%m-%d %H:%M:%S'))
+                embed.add_field(name='**Before**', value=before.content, inline=False)
+                embed.add_field(name='**After**', value=after.content, inline=False)
+                await self._send_message_to_channel(server, embed=embed)
 
     async def on_channel_create(self, channel):
         if not channel.is_private:
