@@ -1,6 +1,5 @@
 from discord.ext import commands
 import aiohttp
-import discord
 import re
 
 
@@ -20,7 +19,7 @@ class YouTube:
             url = 'https://www.youtube.com/results?'
             payload = {'search_query': ''.join(query)}
             headers = {'user-agent': 'Red-cog/1.0'}
-            conn = aiohttp.TCPConnector(verify_ssl=False)
+            conn = aiohttp.TCPConnector()
             session = aiohttp.ClientSession(connector=conn)
             async with session.get(url, params=payload, headers=headers) as r:
                 result = await r.text()
