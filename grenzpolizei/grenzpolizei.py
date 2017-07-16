@@ -8,11 +8,6 @@ from discord.ext import commands
 from __main__ import send_cmd_help
 from cogs.utils.dataIO import dataIO
 
-# TODO
-# Rewrite for new Discord.py
-# More efficient Python formatting
-# Things I forgot...
-
 
 DB_VERSION = 2
 
@@ -86,13 +81,13 @@ class Grenzpolizei:
 
     async def _send_message_to_channel(self, server, embed=None):
         channel = await self._get_channel(server)
-        logging = await self._get_server_logging(server)
-        if logging:
-            to_dict = embed.to_dict()
-            log_entry = await self._parse_log_dict(to_dict)
-            filename = channel.name + '.txt'
-            server_id = server.id
-            await self._save_to_log(server_id, filename, log_entry)
+        # logging = await self._get_server_logging(server)
+        # if logging:
+        #    to_dict = embed.to_dict()
+        #    log_entry = await self._parse_log_dict(to_dict)
+        #    filename = channel.name + '.txt'
+        #    server_id = server.id
+        #    await self._save_to_log(server_id, filename, log_entry)
         await self.bot.send_message(channel, embed=embed)
 
     async def _save_settings(self):
@@ -155,7 +150,7 @@ class Grenzpolizei:
         if server.id in self.settings:
             self.settings[server.id]['channels'] = {}
             self.settings[server.id]['events'] = {}
-            self.settings[server.id]['file_logging'] = False
+            # self.settings[server.id]['file_logging'] = False
             # Member events
             self.settings[server.id]['events']['on_member_join'] = await self._yes_no('Do you want to log members joining? [y]es/[n]o', author)
             self.settings[server.id]['events']['on_member_ban'] = await self._yes_no('Do you want to log members being banned? [y]es/[n]o', author)
@@ -202,7 +197,7 @@ class Grenzpolizei:
                 self.settings[server.id]['channels']['mod_event_channel'] = False
 
             # Logging
-            self.settings[server.id]['file_logging'] = await self._yes_no('Do you want to log everything to a file (filenames will reflect channel names)? [y]es/[n]o', author)
+            # self.settings[server.id]['file_logging'] = await self._yes_no('Do you want to log everything to a file (filenames will reflect channel names)? [y]es/[n]o', author)
 
             await self._save_settings()
             return True
