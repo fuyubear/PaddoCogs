@@ -1,0 +1,8 @@
+{
+    "AUTHOR" : "Paddolicious#8880",
+    "NAME" : "WebStatistics",
+    "SHORT" : "Web Utility for Statistics cog",
+    "DESCRIPTION" : "Creates a webserver to show statistics. Requires my Statistics cog to work.",
+    "REQUIREMENTS" : ["ipgetter"],
+    "TAGS": ["statistics", "tracking", "status", "web", "server"]
+}
