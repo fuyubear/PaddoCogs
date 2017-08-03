@@ -23,9 +23,9 @@ class Kill:
         if server.id in self.kills:
             x = list(self.kills[server.id].keys())
             if victim.id == author.id:
-                message = 'I refuse to kill myself!'
-            elif victim.id == self.bot.user.id:
                 message = 'I won\'t let you kill yourself!'
+            elif victim.id == self.bot.user.id:
+                message = 'I refuse to kill myself!'
             else:
                 message = self.kills[server.id][random.choice(x)]['text'].format(victim=victim.display_name, killer=author.display_name)
         else:
