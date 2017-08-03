@@ -15,9 +15,14 @@ DB_VERSION = 2
 class Grenzpolizei:
     def __init__(self, bot):
         self.bot = bot
+
         self.settings_file = 'data/grenzpolizei/settings.json'
         self.settings = dataIO.load_json(self.settings_file)
+        self.ignore_file = 'data/grenzpolizei/ignore.json'
+        self.ignore = dataIO.load_json(self.ignore_file)
+
         self.event_types = {}
+
         self.event_types['on_member_join'] = 'member_event_channel'
         self.event_types['on_member_remove'] = 'member_event_channel'
         self.event_types['on_member_ban'] = 'member_event_channel'
@@ -48,9 +53,6 @@ class Grenzpolizei:
     async def _validate_server(self, server):
         return True if server.id in self.settings else False
 
-    async def _get_server_logging(self, server):
-        return self.settings[server.id]['file_logging'] if await self._validate_server(server) else False
-
     async def _validate_event(self, server):
         try:
             return self.settings[server.id]['events'][inspect.stack()[1][3]] if await self._validate_server(server) else False
@@ -60,34 +62,8 @@ class Grenzpolizei:
     async def _get_channel(self, server):
         return discord.utils.get(self.bot.get_all_channels(), id=self.settings[server.id]['channels'][self.event_types[inspect.stack()[2][3]]])
 
-    async def _save_to_log(self, server_id, filename, log_entry):
-        folder = 'data/grenzpolizei/logs/{}'.format(server_id)
-        timestamp = datetime.utcnow()
-        entry = '[{}] {}'.format(timestamp, log_entry)
-        if not os.path.exists(folder):
-            os.makedirs(folder)
-        filename = '{}/{}'.format(folder, filename)
-        if not os.path.exists(filename):
-            open(filename, mode='w', encoding='utf-8').write('')
-        open(filename, mode='a', encoding='utf-8').write(entry + '\n')
-
-    async def _parse_log_dict(self, log_dict):
-        entry = ''
-        entry += log_dict['author']['name'] + '\n'
-        if 'fields' in log_dict:
-            for field in log_dict['fields']:
-                entry += field['name'].replace('*', '') + ': ' + field['value'] + '\n'
-        return entry
-
     async def _send_message_to_channel(self, server, embed=None):
         channel = await self._get_channel(server)
-        # logging = await self._get_server_logging(server)
-        # if logging:
-        #    to_dict = embed.to_dict()
-        #    log_entry = await self._parse_log_dict(to_dict)
-        #    filename = channel.name + '.txt'
-        #    server_id = server.id
-        #    await self._save_to_log(server_id, filename, log_entry)
         await self.bot.send_message(channel, embed=embed)
 
     async def _save_settings(self):
@@ -131,6 +107,48 @@ class Grenzpolizei:
             pass
         return False
 
+    async def _ignore(self, server, member=None, channel=None):
+        await self._ignore_server_check(server)
+        if channel:
+            if channel.id in self.ignore[server.id]['channels']:
+                return False
+        if member:
+            if member.id in self.ignore[server.id]['members']:
+                return False
+        return True
+
+    async def _ignore_save(self):
+        dataIO.save_json(self.ignore_file, self.ignore)
+
+    async def _ignore_server_check(self, server):
+        if server.id not in self.ignore:
+            self.ignore[server.id] = {}
+            self.ignore[server.id]['members'] = {}
+            self.ignore[server.id]['channels'] = {}
+        return True
+
+    async def ignoremember(self, server, member):
+        await self._ignore_server_check(server)
+        if member.id in self.ignore[server.id]['members']:
+            del self.ignore[server.id]['members'][member.id]
+            await self._ignore_save()
+            return 'Tracking {} again'.format(member.mention)
+        else:
+            self.ignore[server.id]['members'][member.id] = True
+            await self._ignore_save()
+            return 'Not tracking {} anymore'.format(member.mention)
+
+    async def ignorechannel(self, server, channel):
+        await self._ignore_server_check(server)
+        if channel.id in self.ignore[server.id]['channels']:
+            del self.ignore[server.id]['channels'][channel.id]
+            await self._ignore_save()
+            return 'Tracking {} again'.format(channel.mention)
+        else:
+            self.ignore[server.id]['channels'][channel.id] = True
+            await self._ignore_save()
+            return 'Not tracking {} anymore'.format(channel.mention)
+
     async def _setup_questions(self, context):
         server = context.message.server
         author = context.message.author
@@ -150,32 +168,31 @@ class Grenzpolizei:
         if server.id in self.settings:
             self.settings[server.id]['channels'] = {}
             self.settings[server.id]['events'] = {}
-            # self.settings[server.id]['file_logging'] = False
             # Member events
-            self.settings[server.id]['events']['on_member_join'] = await self._yes_no('Do you want to log members joining? [y]es/[n]o', author)
-            self.settings[server.id]['events']['on_member_ban'] = await self._yes_no('Do you want to log members being banned? [y]es/[n]o', author)
-            self.settings[server.id]['events']['on_member_unban'] = await self._yes_no('Do you want to log members being unbanned? [y]es/[n]o', author)
-            self.settings[server.id]['events']['on_member_remove'] = await self._yes_no('Do you want to log members leaving this server? [y]es/[n]o', author)
-            self.settings[server.id]['events']['on_member_update'] = await self._yes_no('Do you want to log member changes? [y]es/[n]o', author)
-            self.settings[server.id]['events']['on_voice_state_update'] = await self._yes_no('Do you want to log voice channel changes? [y]es/[n]o', author)
+            self.settings[server.id]['events']['on_member_join'] = await self._yes_no('Do you want to track members joining? [y]es/[n]o', author)
+            self.settings[server.id]['events']['on_member_ban'] = await self._yes_no('Do you want to track members being banned? [y]es/[n]o', author)
+            self.settings[server.id]['events']['on_member_unban'] = await self._yes_no('Do you want to track members being unbanned? [y]es/[n]o', author)
+            self.settings[server.id]['events']['on_member_remove'] = await self._yes_no('Do you want to track members leaving this server? [y]es/[n]o', author)
+            self.settings[server.id]['events']['on_member_update'] = await self._yes_no('Do you want to track member changes? [y]es/[n]o', author)
+            self.settings[server.id]['events']['on_voice_state_update'] = await self._yes_no('Do you want to track voice channel changes? [y]es/[n]o', author)
 
             # Message events
-            self.settings[server.id]['events']['on_message_delete'] = await self._yes_no('Do you want to log message deletion? [y]es/[n]o', author)
-            self.settings[server.id]['events']['on_message_edit'] = await self._yes_no('Do you want to log message editing? [y]es/[n]o', author)
+            self.settings[server.id]['events']['on_message_delete'] = await self._yes_no('Do you want to track message deletion? [y]es/[n]o', author)
+            self.settings[server.id]['events']['on_message_edit'] = await self._yes_no('Do you want to track message editing? [y]es/[n]o', author)
 
             # Server events
-            self.settings[server.id]['events']['on_channel_create'] = await self._yes_no('Do you want to log channel creation? [y]es/[n]o', author)
-            self.settings[server.id]['events']['on_channel_delete'] = await self._yes_no('Do you want to log channel deletion? [y]es/[n]o', author)
-            self.settings[server.id]['events']['on_channel_update'] = await self._yes_no('Do you want to log channel updates? [y]es/[n]o', author)
+            self.settings[server.id]['events']['on_channel_create'] = await self._yes_no('Do you want to track channel creation? [y]es/[n]o', author)
+            self.settings[server.id]['events']['on_channel_delete'] = await self._yes_no('Do you want to track channel deletion? [y]es/[n]o', author)
+            self.settings[server.id]['events']['on_channel_update'] = await self._yes_no('Do you want to track channel updates? [y]es/[n]o', author)
 
-            self.settings[server.id]['events']['on_server_role_create'] = await self._yes_no('Do you want to log role creation? [y]es/[n]o', author)
-            self.settings[server.id]['events']['on_server_role_delete'] = await self._yes_no('Do you want to log role deletion? [y]es/[n]o', author)
-            self.settings[server.id]['events']['on_server_role_update'] = await self._yes_no('Do you want to log role updates? [y]es/[n]o', author)
+            self.settings[server.id]['events']['on_server_role_create'] = await self._yes_no('Do you want to track role creation? [y]es/[n]o', author)
+            self.settings[server.id]['events']['on_server_role_delete'] = await self._yes_no('Do you want to track role deletion? [y]es/[n]o', author)
+            self.settings[server.id]['events']['on_server_role_update'] = await self._yes_no('Do you want to track role updates? [y]es/[n]o', author)
 
             # Warning events
-            self.settings[server.id]['events']['on_warning'] = await self._yes_no('Do you want to log member warnings? [y]es/[n]o', author)
-            self.settings[server.id]['events']['on_kick'] = await self._yes_no('Do you want to log member kick warnings? [y]es/[n]o', author)
-            self.settings[server.id]['events']['on_ban'] = await self._yes_no('Do you want to log member ban warnings? [y]es/[n]o', author)
+            self.settings[server.id]['events']['on_warning'] = await self._yes_no('Do you want to track member warnings? [y]es/[n]o', author)
+            self.settings[server.id]['events']['on_kick'] = await self._yes_no('Do you want to track member kick warnings? [y]es/[n]o', author)
+            self.settings[server.id]['events']['on_ban'] = await self._yes_no('Do you want to track member ban warnings? [y]es/[n]o', author)
 
             if any([self.settings[server.id]['events']['on_member_join'], self.settings[server.id]['events']['on_member_ban'],
                     self.settings[server.id]['events']['on_member_unban'], self.settings[server.id]['events']['on_member_remove'], self.settings[server.id]['events']['on_voice_state_update']]):
@@ -195,9 +212,6 @@ class Grenzpolizei:
                 self.settings[server.id]['channels']['mod_event_channel'] = await self._what_channel('Which channel do you want to use for modding events? (please mention the channel)', author)
             else:
                 self.settings[server.id]['channels']['mod_event_channel'] = False
-
-            # Logging
-            # self.settings[server.id]['file_logging'] = await self._yes_no('Do you want to log everything to a file (filenames will reflect channel names)? [y]es/[n]o', author)
 
             await self._save_settings()
             return True
@@ -220,6 +234,28 @@ class Grenzpolizei:
             message = 'You\'re all set up right now!'
         else:
             message = 'Something didn\'t go quite right.'
+        await self.bot.say(message)
+
+    @_grenzpolizei.command(pass_context=True, name='ignoremember')
+    @checks.mod_or_permissions(administrator=True)
+    async def _ignoremember(self, context, member: discord.Member):
+        '''
+        Ignore a member, this is a toggle
+        '''
+        server = context.message.server
+        done = await self.ignoremember(server, member)
+        message = done
+        await self.bot.say(message)
+
+    @_grenzpolizei.command(pass_context=True, name='ignorechannel')
+    @checks.mod_or_permissions(administrator=True)
+    async def _ignorechannel(self, context, channel: discord.Channel):
+        '''
+        Ignore a channel, this is a toggle
+        '''
+        server = context.message.server
+        done = await self.ignorechannel(server, channel)
+        message = done
         await self.bot.say(message)
 
     @_grenzpolizei.command(pass_context=True, name='warn', aliases=['strike'])
@@ -338,46 +374,50 @@ class Grenzpolizei:
 
     async def on_member_update(self, before, after):
         server = after.server
-        if await self._validate_event(server) and after.id != self.bot.user.id:
-            if before.name != after.name:
-                embed = discord.Embed(color=self.blue, description='From **{0.name}** ({0.id}) to **{1.name}**'.format(before, after))
-                embed.set_author(name='Name changed', icon_url=server.icon_url)
-                await self._send_message_to_channel(server, embed=embed)
-            if before.nick != after.nick:
-                embed = discord.Embed(color=self.blue, description='From **{0.nick}** ({0.id}) to **{1.nick}**'.format(before, after))
-                embed.set_author(name='Nickname changed', icon_url=server.icon_url)
-                await self._send_message_to_channel(server, embed=embed)
-            if before.roles != after.roles:
-                if len(before.roles) > len(after.roles):
-                    for role in before.roles:
-                        if role not in after.roles:
-                            embed = discord.Embed(color=self.blue, description='**{0.display_name}** ({0.id}) lost the **{1.name}** role'.format(before, role))
-                            embed.set_author(name='Role removed', icon_url=server.icon_url)
-                elif len(before.roles) < len(after.roles):
-                    for role in after.roles:
-                        if role not in before.roles:
-                            embed = discord.Embed(color=self.blue, description='**{0.display_name}** ({0.id}) got the **{1.name}** role'.format(before, role))
-                            embed.set_author(name='Role applied', icon_url=server.icon_url)
-                await self._send_message_to_channel(server, embed=embed)
+        member = after
+        if await self._ignore(server, member=member):
+            if await self._validate_event(server) and after.id != self.bot.user.id:
+                if before.name != after.name:
+                    embed = discord.Embed(color=self.blue, description='From **{0.name}** ({0.id}) to **{1.name}**'.format(before, after))
+                    embed.set_author(name='Name changed', icon_url=server.icon_url)
+                    await self._send_message_to_channel(server, embed=embed)
+                if before.nick != after.nick:
+                    embed = discord.Embed(color=self.blue, description='From **{0.nick}** ({0.id}) to **{1.nick}**'.format(before, after))
+                    embed.set_author(name='Nickname changed', icon_url=server.icon_url)
+                    await self._send_message_to_channel(server, embed=embed)
+                if before.roles != after.roles:
+                    if len(before.roles) > len(after.roles):
+                        for role in before.roles:
+                            if role not in after.roles:
+                                embed = discord.Embed(color=self.blue, description='**{0.display_name}** ({0.id}) lost the **{1.name}** role'.format(before, role))
+                                embed.set_author(name='Role removed', icon_url=server.icon_url)
+                    elif len(before.roles) < len(after.roles):
+                        for role in after.roles:
+                            if role not in before.roles:
+                                embed = discord.Embed(color=self.blue, description='**{0.display_name}** ({0.id}) got the **{1.name}** role'.format(before, role))
+                                embed.set_author(name='Role applied', icon_url=server.icon_url)
+                    await self._send_message_to_channel(server, embed=embed)
 
     async def on_message_delete(self, message):
         server = message.server
         member = message.author
+        channel = message.channel
         timestamp = datetime.utcnow()
-        if await self._validate_event(server) and member.id != self.bot.user.id:
-            embed = discord.Embed(color=self.red)
-            avatar = member.avatar_url if member.avatar else member.default_avatar_url
-            embed.set_author(name='Message removed', icon_url=avatar)
-            embed.add_field(name='**Member**', value='{0.display_name}#{0.discriminator} ({0.id})'.format(member))
-            embed.add_field(name='**Channel**', value=message.channel.name)
-            embed.add_field(name='**Message timestamp**', value=message.timestamp.strftime('%Y-%m-%d %H:%M:%S'))
-            embed.add_field(name='**Removal timestamp**', value=timestamp.strftime('%Y-%m-%d %H:%M:%S'))
-            if message.content:
-                embed.add_field(name='**Message**', value=message.content, inline=False)
-            if message.attachments:
-                for attachment in message.attachments:
-                    embed.add_field(name='**Attachment**', value='[{filename}]({url})'.format(**attachment), inline=True)
-            await self._send_message_to_channel(server, embed=embed)
+        if await self._ignore(server, member=member, channel=channel):
+            if await self._validate_event(server) and member.id != self.bot.user.id:
+                embed = discord.Embed(color=self.red)
+                avatar = member.avatar_url if member.avatar else member.default_avatar_url
+                embed.set_author(name='Message removed', icon_url=avatar)
+                embed.add_field(name='**Member**', value='{0.display_name}#{0.discriminator} ({0.id})'.format(member))
+                embed.add_field(name='**Channel**', value=message.channel.name)
+                embed.add_field(name='**Message timestamp**', value=message.timestamp.strftime('%Y-%m-%d %H:%M:%S'))
+                embed.add_field(name='**Removal timestamp**', value=timestamp.strftime('%Y-%m-%d %H:%M:%S'))
+                if message.content:
+                    embed.add_field(name='**Message**', value=message.content, inline=False)
+                if message.attachments:
+                    for attachment in message.attachments:
+                        embed.add_field(name='**Attachment**', value='[{filename}]({url})'.format(**attachment), inline=True)
+                await self._send_message_to_channel(server, embed=embed)
 
     async def on_message_edit(self, before, after):
         server = after.server
@@ -385,17 +425,18 @@ class Grenzpolizei:
         channel = after.channel
         timestamp = datetime.utcnow()
         if not channel.is_private:
-            if await self._validate_event(server) and member.id != self.bot.user.id and before.clean_content != after.clean_content:
-                embed = discord.Embed(color=self.blue)
-                avatar = member.avatar_url if member.avatar else member.default_avatar_url
-                embed.set_author(name='Message changed'.format(member), icon_url=avatar)
-                embed.add_field(name='**Member**', value='{0.display_name}#{0.discriminator}\n({0.id})'.format(member))
-                embed.add_field(name='**Channel**', value=before.channel.name)
-                embed.add_field(name='**Message timestamp**', value=before.timestamp.strftime('%Y-%m-%d %H:%M:%S'))
-                embed.add_field(name='**Edit timestamp**', value=timestamp.strftime('%Y-%m-%d %H:%M:%S'))
-                embed.add_field(name='**Before**', value=before.content, inline=False)
-                embed.add_field(name='**After**', value=after.content, inline=False)
-                await self._send_message_to_channel(server, embed=embed)
+            if await self._ignore(server, member=member, channel=channel):
+                if await self._validate_event(server) and member.id != self.bot.user.id and before.clean_content != after.clean_content:
+                    embed = discord.Embed(color=self.blue)
+                    avatar = member.avatar_url if member.avatar else member.default_avatar_url
+                    embed.set_author(name='Message changed'.format(member), icon_url=avatar)
+                    embed.add_field(name='**Member**', value='{0.display_name}#{0.discriminator}\n({0.id})'.format(member))
+                    embed.add_field(name='**Channel**', value=before.channel.name)
+                    embed.add_field(name='**Message timestamp**', value=before.timestamp.strftime('%Y-%m-%d %H:%M:%S'))
+                    embed.add_field(name='**Edit timestamp**', value=timestamp.strftime('%Y-%m-%d %H:%M:%S'))
+                    embed.add_field(name='**Before**', value=before.content, inline=False)
+                    embed.add_field(name='**After**', value=after.content, inline=False)
+                    await self._send_message_to_channel(server, embed=embed)
 
     async def on_channel_create(self, channel):
         if not channel.is_private:
@@ -499,48 +540,48 @@ class Grenzpolizei:
 
     async def on_voice_state_update(self, before, after):
         server = after.server
-        if await self._validate_event(server):
-            if not before.voice.is_afk and after.voice.is_afk:
-                embed = discord.Embed(color=self.blue)
-                embed.set_author(name='{0.display_name} is idle and has been sent to #{0.voice_channel}'.format(after), icon_url=after.avatar_url)
-                await self._send_message_to_channel(server, embed=embed)
-            elif before.voice.is_afk and not after.voice.is_afk:
-                embed = discord.Embed(color=self.blue)
-                embed.set_author(name='{0.display_name} is active again in #{0.voice_channel}'.format(after), icon_url=after.avatar_url)
-                await self._send_message_to_channel(server, embed=embed)
-            if not before.voice.self_mute and after.voice.self_mute:
-                embed = discord.Embed(color=self.blue)
-                embed.set_author(name='{0.display_name} muted themselves in #{0.voice_channel}'.format(after), icon_url=after.avatar_url)
-                await self._send_message_to_channel(server, embed=embed)
-            elif before.voice.self_mute and not after.voice.self_mute:
-                embed = discord.Embed(color=self.blue)
-                embed.set_author(name='{0.display_name} unmuted themselves in #{0.voice_channel}'.format(after), icon_url=after.avatar_url)
-                await self._send_message_to_channel(server, embed=embed)
-            if not before.voice.self_deaf and after.voice.self_deaf:
-                embed = discord.Embed(color=self.blue)
-                embed.set_author(name='{0.display_name} deafened themselves in #{0.voice_channel}'.format(after), icon_url=after.avatar_url)
-                await self._send_message_to_channel(server, embed=embed)
-            elif before.voice.self_deaf and not after.voice.self_deaf:
-                embed = discord.Embed(color=self.blue)
-                embed.set_author(name='{0.display_name} undeafened themselves in #{0.voice_channel}'.format(after), icon_url=after.avatar_url)
-                await self._send_message_to_channel(server, embed=embed)
-            if not before.voice.voice_channel and after.voice.voice_channel:
-                embed = discord.Embed(color=self.blue)
-                embed.set_author(name='{0.display_name} joined voice channel #{0.voice_channel}'.format(after), icon_url=after.avatar_url)
-                await self._send_message_to_channel(server, embed=embed)
-            elif before.voice.voice_channel and not after.voice.voice_channel:
-                embed = discord.Embed(color=self.blue)
-                embed.set_author(name='{1.display_name} left voice channel #{0.voice_channel}'.format(before, after), icon_url=after.avatar_url)
-                await self._send_message_to_channel(server, embed=embed)
+        member = after
+        await self._ignore_server_check(server)
+        if await self._ignore(server, member=member):
+            if await self._validate_event(server):
+                if not before.voice.is_afk and after.voice.is_afk:
+                    embed = discord.Embed(color=self.blue)
+                    embed.set_author(name='{0.display_name} is idle and has been sent to #{0.voice_channel}'.format(after), icon_url=after.avatar_url)
+                    await self._send_message_to_channel(server, embed=embed)
+                elif before.voice.is_afk and not after.voice.is_afk:
+                    embed = discord.Embed(color=self.blue)
+                    embed.set_author(name='{0.display_name} is active again in #{0.voice_channel}'.format(after), icon_url=after.avatar_url)
+                    await self._send_message_to_channel(server, embed=embed)
+                if not before.voice.self_mute and after.voice.self_mute:
+                    embed = discord.Embed(color=self.blue)
+                    embed.set_author(name='{0.display_name} muted themselves in #{0.voice_channel}'.format(after), icon_url=after.avatar_url)
+                    await self._send_message_to_channel(server, embed=embed)
+                elif before.voice.self_mute and not after.voice.self_mute:
+                    embed = discord.Embed(color=self.blue)
+                    embed.set_author(name='{0.display_name} unmuted themselves in #{0.voice_channel}'.format(after), icon_url=after.avatar_url)
+                    await self._send_message_to_channel(server, embed=embed)
+                if not before.voice.self_deaf and after.voice.self_deaf:
+                    embed = discord.Embed(color=self.blue)
+                    embed.set_author(name='{0.display_name} deafened themselves in #{0.voice_channel}'.format(after), icon_url=after.avatar_url)
+                    await self._send_message_to_channel(server, embed=embed)
+                elif before.voice.self_deaf and not after.voice.self_deaf:
+                    embed = discord.Embed(color=self.blue)
+                    embed.set_author(name='{0.display_name} undeafened themselves in #{0.voice_channel}'.format(after), icon_url=after.avatar_url)
+                    await self._send_message_to_channel(server, embed=embed)
+                if not before.voice.voice_channel and after.voice.voice_channel:
+                    embed = discord.Embed(color=self.blue)
+                    embed.set_author(name='{0.display_name} joined voice channel #{0.voice_channel}'.format(after), icon_url=after.avatar_url)
+                    await self._send_message_to_channel(server, embed=embed)
+                elif before.voice.voice_channel and not after.voice.voice_channel:
+                    embed = discord.Embed(color=self.blue)
+                    embed.set_author(name='{1.display_name} left voice channel #{0.voice_channel}'.format(before, after), icon_url=after.avatar_url)
+                    await self._send_message_to_channel(server, embed=embed)
 
 
 def check_folder():
     if not os.path.exists('data/grenzpolizei'):
         print('Creating data/grenzpolizei folder...')
         os.makedirs('data/grenzpolizei')
-    if not os.path.exists('data/grenzpolizei/logs'):
-        print('Creating data/grenzpolizei/logs folder...')
-        os.makedirs('data/grenzpolizei/logs')
 
 
 def check_file():
@@ -548,6 +589,7 @@ def check_file():
 
     data['db_version'] = DB_VERSION
     settings_file = 'data/grenzpolizei/settings.json'
+    ignore_file = 'data/grenzpolizei/ignore.json'
     if not dataIO.is_valid_json(settings_file):
         print('Creating default settings.json...')
         dataIO.save_json(settings_file, data)
@@ -559,6 +601,10 @@ def check_file():
                 data['db_version'] = DB_VERSION
                 print('GRENZPOLIZEI: Database version too old, please rerun the setup!')
                 dataIO.save_json(settings_file, data)
+
+    if not dataIO.is_valid_json(ignore_file):
+        print('Creating default ignore.json...')
+        dataIO.save_json(ignore_file, {})
 
 
 def setup(bot):
