@@ -12,9 +12,6 @@ class Kill:
         self.filename = 'data/kill/kill.json'
         self.kills = dataIO.load_json(self.filename)
 
-    async def get_owner(self):
-        return await self.bot.get_user_info(self.bot.settings.owner)
-
     async def save_kills(self):
         dataIO.save_json(self.filename, self.kills)
 
@@ -23,19 +20,16 @@ class Kill:
         """Randomly chooses a kill."""
         server = context.message.server
         author = context.message.author
-        if victim.id != await self.get_owner().id:
-            if server.id in self.kills:
-                x = list(self.kills[server.id].keys())
-                if victim.id == author.id:
-                    message = 'I won\'t let you kill yourself!'
-                elif victim.id == self.bot.user.id:
-                    message = 'I refuse to kill myself!'
-                else:
-                    message = self.kills[server.id][random.choice(x)]['text'].format(victim=victim.display_name, killer=author.display_name)
+        if server.id in self.kills:
+            x = list(self.kills[server.id].keys())
+            if victim.id == author.id:
+                message = 'I won\'t let you kill yourself!'
+            elif victim.id == self.bot.user.id:
+                message = 'I refuse to kill myself!'
             else:
-                message = 'I don\'t know how to kill yet. Use `{}addkill` to add kills.'.format(context.prefix)
+                message = self.kills[server.id][random.choice(x)]['text'].format(victim=victim.display_name, killer=author.display_name)
         else:
-            message ='I\'m not going to kill my boss...'
+            message = 'I don\'t know how to kill yet. Use `{}addkill` to add kills.'.format(context.prefix)
         await self.bot.say(message)
 
     @commands.command(pass_context=True, name='removekill')
