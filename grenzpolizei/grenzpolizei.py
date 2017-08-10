@@ -166,54 +166,61 @@ class Grenzpolizei:
         if server.id not in self.settings:
             self.settings[server.id] = {}
         if server.id in self.settings:
-            self.settings[server.id]['channels'] = {}
-            self.settings[server.id]['events'] = {}
+            events = {}
             # Member events
-            self.settings[server.id]['events']['on_member_join'] = await self._yes_no('Do you want to track members joining? [y]es/[n]o', author)
-            self.settings[server.id]['events']['on_member_ban'] = await self._yes_no('Do you want to track members being banned? [y]es/[n]o', author)
-            self.settings[server.id]['events']['on_member_unban'] = await self._yes_no('Do you want to track members being unbanned? [y]es/[n]o', author)
-            self.settings[server.id]['events']['on_member_remove'] = await self._yes_no('Do you want to track members leaving this server? [y]es/[n]o', author)
-            self.settings[server.id]['events']['on_member_update'] = await self._yes_no('Do you want to track member changes? [y]es/[n]o', author)
-            self.settings[server.id]['events']['on_voice_state_update'] = await self._yes_no('Do you want to track voice channel changes? [y]es/[n]o', author)
+            events['on_member_join'] = await self._yes_no('Do you want to track members joining? [y]es/[n]o', author)
+            events['on_member_ban'] = await self._yes_no('Do you want to track members being banned? [y]es/[n]o', author)
+            events['on_member_unban'] = await self._yes_no('Do you want to track members being unbanned? [y]es/[n]o', author)
+            events['on_member_remove'] = await self._yes_no('Do you want to track members leaving this server? [y]es/[n]o', author)
+            events['on_member_update'] = await self._yes_no('Do you want to track member changes? [y]es/[n]o', author)
+            events['on_voice_state_update'] = await self._yes_no('Do you want to track voice channel changes? [y]es/[n]o', author)
 
             # Message events
-            self.settings[server.id]['events']['on_message_delete'] = await self._yes_no('Do you want to track message deletion? [y]es/[n]o', author)
-            self.settings[server.id]['events']['on_message_edit'] = await self._yes_no('Do you want to track message editing? [y]es/[n]o', author)
+            events['on_message_delete'] = await self._yes_no('Do you want to track message deletion? [y]es/[n]o', author)
+            events['on_message_edit'] = await self._yes_no('Do you want to track message editing? [y]es/[n]o', author)
 
             # Server events
-            self.settings[server.id]['events']['on_channel_create'] = await self._yes_no('Do you want to track channel creation? [y]es/[n]o', author)
-            self.settings[server.id]['events']['on_channel_delete'] = await self._yes_no('Do you want to track channel deletion? [y]es/[n]o', author)
-            self.settings[server.id]['events']['on_channel_update'] = await self._yes_no('Do you want to track channel updates? [y]es/[n]o', author)
+            events['on_channel_create'] = await self._yes_no('Do you want to track channel creation? [y]es/[n]o', author)
+            events['on_channel_delete'] = await self._yes_no('Do you want to track channel deletion? [y]es/[n]o', author)
+            events['on_channel_update'] = await self._yes_no('Do you want to track channel updates? [y]es/[n]o', author)
 
-            self.settings[server.id]['events']['on_server_role_create'] = await self._yes_no('Do you want to track role creation? [y]es/[n]o', author)
-            self.settings[server.id]['events']['on_server_role_delete'] = await self._yes_no('Do you want to track role deletion? [y]es/[n]o', author)
-            self.settings[server.id]['events']['on_server_role_update'] = await self._yes_no('Do you want to track role updates? [y]es/[n]o', author)
+            events['on_server_role_create'] = await self._yes_no('Do you want to track role creation? [y]es/[n]o', author)
+            events['on_server_role_delete'] = await self._yes_no('Do you want to track role deletion? [y]es/[n]o', author)
+            events['on_server_role_update'] = await self._yes_no('Do you want to track role updates? [y]es/[n]o', author)
 
             # Warning events
-            self.settings[server.id]['events']['on_warning'] = await self._yes_no('Do you want to track member warnings? [y]es/[n]o', author)
-            self.settings[server.id]['events']['on_kick'] = await self._yes_no('Do you want to track member kick warnings? [y]es/[n]o', author)
-            self.settings[server.id]['events']['on_ban'] = await self._yes_no('Do you want to track member ban warnings? [y]es/[n]o', author)
+            events['on_warning'] = await self._yes_no('Do you want to track member warnings? [y]es/[n]o', author)
+            events['on_kick'] = await self._yes_no('Do you want to track member kick warnings? [y]es/[n]o', author)
+            events['on_ban'] = await self._yes_no('Do you want to track member ban warnings? [y]es/[n]o', author)
+
+            self.settings[server.id]['channels'] = {}
 
             if any([self.settings[server.id]['events']['on_member_join'], self.settings[server.id]['events']['on_member_ban'],
                     self.settings[server.id]['events']['on_member_unban'], self.settings[server.id]['events']['on_member_remove'], self.settings[server.id]['events']['on_voice_state_update']]):
                 self.settings[server.id]['channels']['member_event_channel'] = await self._what_channel('Which channel do you want to use for member events? (please mention the channel)', author)
             else:
                 self.settings[server.id]['channels']['member_event_channel'] = False
+
             if any([self.settings[server.id]['events']['on_message_delete'], self.settings[server.id]['events']['on_message_edit']]):
                 self.settings[server.id]['channels']['message_event_channel'] = await self._what_channel('Which channel do you want to use for message events? (please mention the channel)', author)
             else:
                 self.settings[server.id]['channels']['message_event_channel'] = False
+
             if any([self.settings[server.id]['events']['on_channel_create'], self.settings[server.id]['events']['on_channel_delete'], self.settings[server.id]['events']['on_channel_update'],
                     self.settings[server.id]['events']['on_server_role_create'], self.settings[server.id]['events']['on_server_role_delete'], self.settings[server.id]['events']['on_server_role_update']]):
                 self.settings[server.id]['channels']['server_event_channel'] = await self._what_channel('Which channel do you want to use for server events? (please mention the channel)', author)
             else:
                 self.settings[server.id]['channels']['server_event_channel'] = False
+
             if any([self.settings[server.id]['events']['on_warning'], self.settings[server.id]['events']['on_kick'], self.settings[server.id]['events']['on_ban']]):
                 self.settings[server.id]['channels']['mod_event_channel'] = await self._what_channel('Which channel do you want to use for modding events? (please mention the channel)', author)
             else:
                 self.settings[server.id]['channels']['mod_event_channel'] = False
 
+            self.settings[server.id]['events'] = events
+
             await self._save_settings()
+
             return True
         else:
             return False
