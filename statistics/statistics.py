@@ -115,7 +115,7 @@ class Statistics:
 
     async def embed_statistics(self):
         stats = self.retrieve_statistics()
-        em = discord.Embed(description='\a\n', color=discord.Color.red())
+        em = discord.Embed(description=u'\u2063\n', color=discord.Color.red())
         avatar = self.bot.user.avatar_url if self.bot.user.avatar else self.bot.user.default_avatar_url
         em.set_author(name='Statistics of {}'.format(stats['name']), icon_url=avatar)
 
@@ -130,13 +130,13 @@ class Statistics:
 
         em.add_field(name='**Messages received**', value=str(stats['read_messages']))
         em.add_field(name='**Commands run**', value=str(stats['commands_run']))
-        em.add_field(name='\a', value='\a')
+        em.add_field(name=u'\u2063', value=u'\u2063')
 
         em.add_field(name='**Active cogs**', value=str(len(self.bot.cogs)))
         em.add_field(name='**Commands**', value=str(len(self.bot.commands)))
-        em.add_field(name='\a', value='\a')
+        em.add_field(name=u'\u2063', value=u'\u2063')
 
-        em.add_field(name='\a', value='\a', inline=False)
+        em.add_field(name=u'\u2063', value=u'\u2063', inline=False)
         em.add_field(name='**CPU**', value='{0:.1f}%'.format(stats['cpu_usage']))
         em.add_field(name='**Memory**', value='{0:.0f} MB ({1:.1f}%)'.format(stats['mem_v_mb'] / 1024 / 1024, stats['mem_v']))
         em.add_field(name='**Threads**', value='{}'.format(stats['threads']))
