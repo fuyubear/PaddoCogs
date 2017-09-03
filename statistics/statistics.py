@@ -138,7 +138,7 @@ class Statistics:
 
         em.add_field(name=u'\u2063', value=u'\u2063', inline=False)
         em.add_field(name='**CPU**', value='{0:.1f}%'.format(stats['cpu_usage']))
-        em.add_field(name='**Memory**', value='{0:.0f} MB ({1:.1f}%)'.format(stats['mem_v_mb'] / 1024 / 1024, stats['mem_v']))
+        em.add_field(name='**Memory**', value='{0:.0f} MB ({1:.2f}%)'.format(stats['mem_v_mb'] / 1024 / 1024, stats['mem_v']))
         em.add_field(name='**Threads**', value='{}'.format(stats['threads']))
         em.set_footer(text='API version {}'.format(discord.__version__))
         return em
@@ -152,12 +152,12 @@ class Statistics:
         text_channels = 0
         voice_channels = 0
 
-        process = psutil.Process(os.getpid())
+        process = psutil.Process()
 
-        cpu_usage = process.cpu_percent()
+        cpu_usage = psutil.cpu_percent()
 
         mem_v = process.memory_percent()
-        mem_v_mb = process.memory_info().vms
+        mem_v_mb = process.memory_full_info().uss
         threads = process.num_threads()
 
         io_reads = process.io_counters().read_count
