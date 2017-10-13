@@ -9,6 +9,9 @@ import random
 import time
 import os
 
+# TODO
+# Show error when timing intervals are the same
+
 
 class Hunting:
     def __init__(self, bot):
@@ -71,6 +74,8 @@ class Hunting:
             message = '**`interval_min` needs to be lower than `interval_max`**'
         elif interval_min < 0 and interval_max < 0 and bang_timeout < 0:
             message = '**Please no negative numbers!**'
+        elif interval_min == interval_max:
+            message = '**`interval_min` and `interval_max` cannot be the same**'
         else:
             self.settings['hunt_interval_minimum'] = interval_min
             self.settings['hunt_interval_maximum'] = interval_max
@@ -79,9 +84,9 @@ class Hunting:
             message = '**Timing has been set.**'
         await self.bot.say(message)
 
-    @_hunting.command(no_pm=True, name='next')
+    @_hunting.command(pass_context=True, no_pm=True, name='next')
     @checks.is_owner()
-    async def _next(self):
+    async def _next(self, context):
         """When will the next occurance happen?"""
         if self.next:
             time = abs(datetime.datetime.utcnow() - self.next)
