@@ -120,7 +120,7 @@ class Steam:
                 em.set_footer(text='Information provided by Steam', icon_url='http://store.akamai.steamstatic.com/public/shared/images/header/globalheader_logo.png')
                 await self.bot.say(embed=em)
             else:
-                message = '`Game was found, but could not retrive information`'
+                message = '`Game was found, but could not retrieve relevant information`'
                 await self.bot.say(message)
         elif games:
             message = '```This game was not found. But I found close matches:\n\n'
