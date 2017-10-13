@@ -36,7 +36,7 @@ class Spotify:
             r = await self._api_request(query)
             if r['tracks']['total'] > 0:
                 items = r['tracks']['items']
-                l = '\a\n'
+                l = u'\u2063\n'
                 for i, item in enumerate(items, 1):
                     track = await self.escape(item['name'])
                     artist = await self.escape(item['artists'][0]['name'])
@@ -45,7 +45,7 @@ class Spotify:
                     if i > 5:
                         break
                     l += '{} **[{}]({})** by **{}**\n\n'.format('[:arrow_forward:]({})'.format(preview_url) if preview_url else ':stop_button:', track, url, artist)
-                l += '\a'
+                l += u'\u2063'
                 em = discord.Embed(title='Search results for "{}":'.format(query), description=l)
                 em.set_footer(icon_url='https://upload.wikimedia.org/wikipedia/commons/thumb/1/19/Spotify_logo_without_text.svg/2000px-Spotify_logo_without_text.svg.png', text='Powered by Spotify (▶️ preview available ⏹️ no preview available)')
                 await self.bot.say(embed=em)

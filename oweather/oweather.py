@@ -312,7 +312,7 @@ class Weather:
             request = await self._api_request(location)
             if request['cod'] == 200:
                 weather = await self._parse_data(request)
-                em = discord.Embed(title='{0.clouds} in {0.place}, {0.country}'.format(weather), color=discord.Color.blue(), description='\a\n', url='https://openweathermap.org/city/{0.city_id}'.format(weather))
+                em = discord.Embed(title='{0.clouds} in {0.place}, {0.country}'.format(weather), color=discord.Color.blue(), description=u'\u2063\n', url='https://openweathermap.org/city/{0.city_id}'.format(weather))
                 em.add_field(name='**Temperature**', value='{0.celcius:.1f} °C\n{0.fahrenheit:.1f} °F'.format(weather))
                 em.add_field(name='**Wind**', value='{0.wind_kmh} km/h\n{0.wind_mph} mph'.format(weather))
                 em.add_field(name='**Pressure / Humidity**', value='{0.pressure} hPa / {0.humidity}%'.format(weather))
