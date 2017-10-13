@@ -12,6 +12,11 @@ from cogs.utils.dataIO import dataIO
 DB_VERSION = 2
 
 
+# TODO
+# Better error handling (dumping errors in terminal)
+# Better errors returning to channels
+# ignore entire channel in channel events
+
 class Grenzpolizei:
     def __init__(self, bot):
         self.bot = bot
@@ -144,12 +149,13 @@ class Grenzpolizei:
     async def _setup_questions(self, context):
         server = context.message.server
         author = context.message.author
-        instructions = '''Thank you for using Grenzpolizei! However, this cog requires some setting up. A dozen or so questions will be asked,
-                            and you\'re required to answer them with either **\'yes\'** or **\'no\'** answers.\n\n'''
+        instructions = 'Thank you for using Grenzpolizei! However, this cog requires some setting up and a dozen or so questions will be asked.\n'
+        instructions += 'You\'re required to answer them with either **\'yes\'** or **\'no\'** answers.\n\n'
         instructions += 'You get **2 minutes** to answer each question. If not answered it will be defaulted to **\'no\'**.\n\n'
         instructions += 'Then you\'re required to give a channel for each event category, these categories are:\n\n'
         instructions += '**- member events**\n**- message events**\n**- server events**\n**- warning events.**\n\n'
-        instructions += 'Each channel _needs_ to be a channel mention, otherwise it won\'t work. You can use the same channel for all event types. Be also sure to give the bot permissions to post and embed messages in that channel.\n\n'
+        instructions += 'Each channel _needs_ to be a channel mention, otherwise it won\'t work. You can use the same channel for all event types.\n'
+        instructions += 'Make also sure to give proper permissions to the bot to post and embed messages in these channels.\n\n'
         instructions += '**Good luck!**'
 
         embed = discord.Embed(title='**Welcome to the setup for Grenzpolizei**', description=instructions, color=self.green)
@@ -187,8 +193,7 @@ class Grenzpolizei:
             events['on_kick'] = await self._yes_no('Do you want to track member kick warnings? [y]es/[n]o', author)
             events['on_ban'] = await self._yes_no('Do you want to track member ban warnings? [y]es/[n]o', author)
 
-            if any([events['on_member_join'], events['on_member_ban'],
-                    events['on_member_unban'], events['on_member_remove'], events['on_voice_state_update']]):
+            if any([events['on_member_join'], events['on_member_ban'], events['on_member_unban'], events['on_member_remove'], events['on_voice_state_update']]):
                 channels['member_event_channel'] = await self._what_channel('Which channel do you want to use for member events? (please mention the channel)', author)
             else:
                 channels['member_event_channel'] = False
@@ -198,8 +203,8 @@ class Grenzpolizei:
             else:
                 channels['message_event_channel'] = False
 
-            if any([events['on_channel_create'], events['on_channel_delete'], events['on_channel_update'],
-                    events['on_server_role_create'], events['on_server_role_delete'], events['on_server_role_update']]):
+            if any([events['on_channel_create'], events['on_channel_delete'], events['on_channel_update'], events['on_server_role_create'],
+                    events['on_server_role_delete'], events['on_server_role_update']]):
                 channels['server_event_channel'] = await self._what_channel('Which channel do you want to use for server events? (please mention the channel)', author)
             else:
                 channels['server_event_channel'] = False
