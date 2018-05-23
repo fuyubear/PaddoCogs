@@ -13,9 +13,7 @@ DB_VERSION = 2
 
 
 # TODO
-# Better error handling (dumping errors in terminal)
-# Better errors returning to channels
-# ignore entire channel in channel events
+# Nothing... not supported anymore officially.
 
 class Grenzpolizei:
     def __init__(self, bot):
@@ -557,22 +555,23 @@ class Grenzpolizei:
                     embed = discord.Embed(color=self.blue)
                     embed.set_author(name='{0.display_name} is active again in #{0.voice_channel}'.format(after), icon_url=after.avatar_url if after.avatar_url else after.default_avatar_url)
                     await self._send_message_to_channel(server, embed=embed)
-                if not before.voice.self_mute and after.voice.self_mute:
-                    embed = discord.Embed(color=self.blue)
-                    embed.set_author(name='{0.display_name} muted themselves in #{0.voice_channel}'.format(after), icon_url=after.avatar_url if after.avatar_url else after.default_avatar_url)
-                    await self._send_message_to_channel(server, embed=embed)
-                elif before.voice.self_mute and not after.voice.self_mute:
-                    embed = discord.Embed(color=self.blue)
-                    embed.set_author(name='{0.display_name} unmuted themselves in #{0.voice_channel}'.format(after), icon_url=after.avatar_url if after.avatar_url else after.default_avatar_url)
-                    await self._send_message_to_channel(server, embed=embed)
-                if not before.voice.self_deaf and after.voice.self_deaf:
-                    embed = discord.Embed(color=self.blue)
-                    embed.set_author(name='{0.display_name} deafened themselves in #{0.voice_channel}'.format(after), icon_url=after.avatar_url if after.avatar_url else after.default_avatar_url)
-                    await self._send_message_to_channel(server, embed=embed)
-                elif before.voice.self_deaf and not after.voice.self_deaf:
-                    embed = discord.Embed(color=self.blue)
-                    embed.set_author(name='{0.display_name} undeafened themselves in #{0.voice_channel}'.format(after), icon_url=after.avatar_url if after.avatar_url else after.default_avatar_url)
-                    await self._send_message_to_channel(server, embed=embed)
+                # For a friend of a friend who knows a friend that knows a guy that said that their mother's grandfather's caretaker's son that needed help.
+                # if not before.voice.self_mute and after.voice.self_mute:
+                #    embed = discord.Embed(color=self.blue)
+                #    embed.set_author(name='{0.display_name} muted themselves in #{0.voice_channel}'.format(after), icon_url=after.avatar_url if after.avatar_url else after.default_avatar_url)
+                #    await self._send_message_to_channel(server, embed=embed)
+                # elif before.voice.self_mute and not after.voice.self_mute:
+                #    embed = discord.Embed(color=self.blue)
+                #    embed.set_author(name='{0.display_name} unmuted themselves in #{0.voice_channel}'.format(after), icon_url=after.avatar_url if after.avatar_url else after.default_avatar_url)
+                #    await self._send_message_to_channel(server, embed=embed)
+                # if not before.voice.self_deaf and after.voice.self_deaf:
+                #    embed = discord.Embed(color=self.blue)
+                #    embed.set_author(name='{0.display_name} deafened themselves in #{0.voice_channel}'.format(after), icon_url=after.avatar_url if after.avatar_url else after.default_avatar_url)
+                #    await self._send_message_to_channel(server, embed=embed)
+                # elif before.voice.self_deaf and not after.voice.self_deaf:
+                #    embed = discord.Embed(color=self.blue)
+                #    embed.set_author(name='{0.display_name} undeafened themselves in #{0.voice_channel}'.format(after), icon_url=after.avatar_url if after.avatar_url else after.default_avatar_url)
+                #    await self._send_message_to_channel(server, embed=embed)
                 if not before.voice.voice_channel and after.voice.voice_channel:
                     embed = discord.Embed(color=self.blue)
                     embed.set_author(name='{0.display_name} joined voice channel #{0.voice_channel}'.format(after), icon_url=after.avatar_url if after.avatar_url else after.default_avatar_url)
