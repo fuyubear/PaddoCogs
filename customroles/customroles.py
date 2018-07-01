@@ -14,19 +14,19 @@ class CustomRoles:
         self.roles = dataIO.load_json(self.roles_file)
 
     async def server_has_role(self, server, role):
-        if role in [role.name for role in server.roles]:
+        if role.lower() in [role.name.lower() for role in server.roles]:
             return True
         return False
 
     async def bot_has_role(self, server, role):
         if server.id in self.roles:
-            if role in self.roles[server.id]:
+            if role.lower() in self.roles[server.id]:
                 return True
         return False
 
     async def server_get_role(self, server, role):
         if await self.server_has_role(server, role):
-            return [r for r in server.roles if r.name == role][0]
+            return [r for r in server.roles if r.name.lower() == role.lower()][0]
         return False
 
     async def save_role_data(self):
@@ -40,7 +40,7 @@ class CustomRoles:
                     await self.bot.create_role(server, name=role, color=color, permissions=discord.Permissions(permissions=0), hoist=False)
                     if server.id not in self.roles:
                         self.roles[server.id] = {}
-                    self.roles[server.id][role] = {}
+                    self.roles[server.id][role.lower()] = {}
                     await self.save_role_data()
                     return 0
                 else:
@@ -58,7 +58,7 @@ class CustomRoles:
                 if server.id not in self.roles:
                     self.roles[server.id] = {}
                 if role.name in self.roles[server.id]:
-                    del self.roles[server.id][role.name]
+                    del self.roles[server.id][role.name.lower()]
                 await self.save_role_data()
                 return 0
             except discord.Forbidden:
@@ -99,7 +99,6 @@ class CustomRoles:
     async def _add(self, context, color, *, name):
         """Add a role
         Example: role add ff0000 Red Role"""
-        message = name, color
         server = context.message.server
         check = await self.server_add_role(server, name, color)
         if check == 0:
