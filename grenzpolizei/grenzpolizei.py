@@ -312,7 +312,7 @@ class Grenzpolizei:
         if await self._validate_event(server) and member.id != self.bot.user.id:
             avatar = member.avatar_url if member.avatar else member.default_avatar_url
             embed = discord.Embed(color=self.orange)
-            embed.set_author(name='{0.name}#{0.discriminator} ({0.id}) has been warned'.format(member), icon_url=avatar)
+            embed.set_author(name='{0} ({0.id}) has been warned'.format(member), icon_url=avatar)
             embed.add_field(name='**Mod**', value=mod.name, inline=False)
             embed.add_field(name='**Reason**', value=reason)
             await self._send_message_to_channel(server, embed=embed)
@@ -324,7 +324,7 @@ class Grenzpolizei:
         if await self._validate_event(server) and member.id != self.bot.user.id:
             avatar = member.avatar_url if member.avatar else member.default_avatar_url
             embed = discord.Embed(color=self.red)
-            embed.set_author(name='{0.name}#{0.discriminator} ({0.id}) has been kicked'.format(member), icon_url=avatar)
+            embed.set_author(name='{0} ({0.id}) has been kicked'.format(member), icon_url=avatar)
             embed.add_field(name='**Mod**', value=mod.name, inline=False)
             embed.add_field(name='**Reason**', value=reason)
             await self._send_message_to_channel(server, embed=embed)
@@ -336,7 +336,7 @@ class Grenzpolizei:
         if await self._validate_event(server) and member.id != self.bot.user.id:
             avatar = member.avatar_url if member.avatar else member.default_avatar_url
             embed = discord.Embed(color=self.red)
-            embed.set_author(name='{0.name}#{0.discriminator} ({0.id}) has been banned'.format(member), icon_url=avatar)
+            embed.set_author(name='{0} ({0.id}) has been banned'.format(member), icon_url=avatar)
             embed.add_field(name='**Mod**', value=mod.name, inline=False)
             embed.add_field(name='**Reason**', value=reason)
             await self._send_message_to_channel(server, embed=embed)
@@ -411,7 +411,7 @@ class Grenzpolizei:
                 embed = discord.Embed(color=self.red)
                 avatar = member.avatar_url if member.avatar else member.default_avatar_url
                 embed.set_author(name='Message removed', icon_url=avatar)
-                embed.add_field(name='**Member**', value='{0.display_name}#{0.discriminator} ({0.id})'.format(member))
+                embed.add_field(name='**Member**', value='{0} ({0.id})'.format(member))
                 embed.add_field(name='**Channel**', value=message.channel.name)
                 embed.add_field(name='**Message timestamp**', value=message.timestamp.strftime('%Y-%m-%d %H:%M:%S'))
                 embed.add_field(name='**Removal timestamp**', value=timestamp.strftime('%Y-%m-%d %H:%M:%S'))
@@ -433,7 +433,7 @@ class Grenzpolizei:
                     embed = discord.Embed(color=self.blue)
                     avatar = member.avatar_url if member.avatar else member.default_avatar_url
                     embed.set_author(name='Message changed'.format(member), icon_url=avatar)
-                    embed.add_field(name='**Member**', value='{0.display_name}#{0.discriminator}\n({0.id})'.format(member))
+                    embed.add_field(name='**Member**', value='{0}\n({0.id})'.format(member))
                     embed.add_field(name='**Channel**', value=before.channel.name)
                     embed.add_field(name='**Message timestamp**', value=before.timestamp.strftime('%Y-%m-%d %H:%M:%S'))
                     embed.add_field(name='**Edit timestamp**', value=timestamp.strftime('%Y-%m-%d %H:%M:%S'))
