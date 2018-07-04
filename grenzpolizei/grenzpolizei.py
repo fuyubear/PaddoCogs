@@ -348,7 +348,7 @@ class Grenzpolizei:
         server = member.server
         if await self._validate_event(server) and member.id != self.bot.user.id:
             avatar = member.avatar_url if member.avatar else member.default_avatar_url
-            embed = discord.Embed(color=self.green, description='**{0.name}#{0.discriminator}** ({0.id})'.format(member))
+            embed = discord.Embed(color=self.green, description='**{0}** ({0.id})'.format(member))
             embed.set_author(name='Member joined', icon_url=avatar)
             await self._send_message_to_channel(server, embed=embed)
 
@@ -356,14 +356,14 @@ class Grenzpolizei:
         server = member.server
         if await self._validate_event(server) and member.id != self.bot.user.id:
             avatar = member.avatar_url if member.avatar else member.default_avatar_url
-            embed = discord.Embed(color=self.red, description='**{0.name}#{0.discriminator}** ({0.display_name} {0.id})'.format(member))
+            embed = discord.Embed(color=self.red, description='**{0}** ({0.display_name} {0.id})'.format(member))
             embed.set_author(name='Member banned', icon_url=avatar)
             await self._send_message_to_channel(server, embed=embed)
 
     async def on_member_unban(self, server, member):
         if await self._validate_event(server) and member.id != self.bot.user.id:
             avatar = member.avatar_url if member.avatar else member.default_avatar_url
-            embed = discord.Embed(color=self.orange, description='**{0.name}#{0.discriminator}** ({0.id})'.format(member))
+            embed = discord.Embed(color=self.orange, description='**{0}** ({0.id})'.format(member))
             embed.set_author(name='Member unbanned', icon_url=avatar)
             await self._send_message_to_channel(server, embed=embed)
 
@@ -371,7 +371,7 @@ class Grenzpolizei:
         server = member.server
         if await self._validate_event(server) and member.id != self.bot.user.id:
             avatar = member.avatar_url if member.avatar else member.default_avatar_url
-            embed = discord.Embed(color=self.red, description='**{0.name}#{0.discriminator}** ({0.display_name} {0.id})'.format(member))
+            embed = discord.Embed(color=self.red, description='**{0}** ({0.display_name} {0.id})'.format(member))
             embed.set_author(name='Member left', icon_url=avatar)
             await self._send_message_to_channel(server, embed=embed)
 
